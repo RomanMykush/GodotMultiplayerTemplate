@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3 uid="uid://c7dgf5bync2j1"]
+
+[ext_resource type="Script" path="res://client/ClientStartUp.cs" id="1_g74xa"]
+
+[node name="ClientStartUp" type="Node"]
+script = ExtResource("1_g74xa")
+PhysicsTicksRate = 60
+Singletons = Array[PackedScene]([])
