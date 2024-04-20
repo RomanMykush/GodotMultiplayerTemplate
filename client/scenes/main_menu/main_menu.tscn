@@ -1,0 +1,221 @@
+[gd_scene load_steps=14 format=3 uid="uid://b6s4savshuyhb"]
+
+[ext_resource type="Script" path="res://client/scenes/main_menu/MainMenu.cs" id="1_rouhy"]
+[ext_resource type="PackedScene" uid="uid://2o0ewa233hyl" path="res://client/scenes/main_menu/components/host_game_menu.tscn" id="2_whfe0"]
+[ext_resource type="PackedScene" uid="uid://1eml3sfpp73e" path="res://client/scenes/main_menu/components/join_game_menu.tscn" id="3_44ttr"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_lq1wc"]
+content_margin_top = 3.0
+content_margin_bottom = 3.0
+bg_color = Color(0.129412, 0.129412, 0.129412, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_3n1cp"]
+content_margin_top = 3.0
+content_margin_bottom = 3.0
+bg_color = Color(0.254902, 0.254902, 0.254902, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_38tw8"]
+content_margin_top = 3.0
+content_margin_bottom = 3.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_8kwo1"]
+bg_color = Color(0.423529, 0.423529, 0.423529, 1)
+
+[sub_resource type="Animation" id="Animation_tox0q"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("HBoxContainer/SidePanel/Spacer:custom_minimum_size")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(0, 0)]
+}
+
+[sub_resource type="Animation" id="Animation_pa4ds"]
+resource_name = "open_side_panel"
+length = 0.5
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("HBoxContainer/SidePanel/Spacer:custom_minimum_size")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.2),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector2(0, 0), Vector2(800, 0)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_yhftp"]
+_data = {
+"RESET": SubResource("Animation_tox0q"),
+"open_side_panel": SubResource("Animation_pa4ds")
+}
+
+[sub_resource type="Animation" id="Animation_e0v7x"]
+resource_name = "show_content"
+length = 0.5
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("HBoxContainer/SidePanel/Content:custom_minimum_size")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.5),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector2(0, 0), Vector2(800, 0)]
+}
+
+[sub_resource type="Animation" id="Animation_4fc7v"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("HBoxContainer/SidePanel/Content:custom_minimum_size")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(0, 0)]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_8pem1"]
+_data = {
+"RESET": SubResource("Animation_4fc7v"),
+"show_content": SubResource("Animation_e0v7x")
+}
+
+[node name="MainMenu" type="MarginContainer"]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -576.0
+offset_top = -324.0
+offset_right = 576.0
+offset_bottom = 324.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 4
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
+script = ExtResource("1_rouhy")
+HostGameMenuScene = ExtResource("2_whfe0")
+JoinGameMenuScene = ExtResource("3_44ttr")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
+layout_mode = 2
+theme_override_constants/separation = 0
+alignment = 1
+
+[node name="MainPanel" type="PanelContainer" parent="HBoxContainer"]
+layout_mode = 2
+
+[node name="MarginContainer" type="MarginContainer" parent="HBoxContainer/MainPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 15
+theme_override_constants/margin_top = 15
+theme_override_constants/margin_right = 15
+theme_override_constants/margin_bottom = 15
+
+[node name="VBoxContainer" type="VBoxContainer" parent="HBoxContainer/MainPanel/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 15
+
+[node name="Title" type="Label" parent="HBoxContainer/MainPanel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "Steampunk DnD rpg"
+
+[node name="Spacer" type="Control" parent="HBoxContainer/MainPanel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="HostButton" type="Button" parent="HBoxContainer/MainPanel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_lq1wc")
+theme_override_styles/hover = SubResource("StyleBoxFlat_3n1cp")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_38tw8")
+text = "Host game"
+
+[node name="JoinButton" type="Button" parent="HBoxContainer/MainPanel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_lq1wc")
+theme_override_styles/hover = SubResource("StyleBoxFlat_3n1cp")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_38tw8")
+text = "Join game"
+
+[node name="SettingsButton" type="Button" parent="HBoxContainer/MainPanel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_lq1wc")
+theme_override_styles/hover = SubResource("StyleBoxFlat_3n1cp")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_38tw8")
+text = "Settings"
+
+[node name="ExitButton" type="Button" parent="HBoxContainer/MainPanel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+theme_override_styles/normal = SubResource("StyleBoxFlat_lq1wc")
+theme_override_styles/hover = SubResource("StyleBoxFlat_3n1cp")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_38tw8")
+text = "Exit"
+
+[node name="Spacer2" type="Control" parent="HBoxContainer/MainPanel/MarginContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="SidePanel" type="VBoxContainer" parent="HBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="Spacer" type="Control" parent="HBoxContainer/SidePanel"]
+layout_mode = 2
+
+[node name="Content" type="Control" parent="HBoxContainer/SidePanel"]
+clip_contents = true
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 3
+
+[node name="MarginContainer" type="MarginContainer" parent="HBoxContainer/SidePanel/Content"]
+layout_mode = 1
+anchors_preset = 11
+anchor_left = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -800.0
+grow_horizontal = 0
+grow_vertical = 2
+theme_override_constants/margin_top = 35
+theme_override_constants/margin_bottom = 35
+
+[node name="ContentContainer" type="PanelContainer" parent="HBoxContainer/SidePanel/Content/MarginContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_8kwo1")
+
+[node name="SidePanelAnimPlayer" type="AnimationPlayer" parent="."]
+unique_name_in_owner = true
+libraries = {
+"": SubResource("AnimationLibrary_yhftp")
+}
+
+[node name="ContentAnimPlayer" type="AnimationPlayer" parent="."]
+unique_name_in_owner = true
+libraries = {
+"": SubResource("AnimationLibrary_8pem1")
+}
+
+[connection signal="pressed" from="HBoxContainer/MainPanel/MarginContainer/VBoxContainer/HostButton" to="." method="RequestContent" binds= ["HostGameMenu"]]
+[connection signal="pressed" from="HBoxContainer/MainPanel/MarginContainer/VBoxContainer/JoinButton" to="." method="RequestContent" binds= ["JoinGameMenu"]]

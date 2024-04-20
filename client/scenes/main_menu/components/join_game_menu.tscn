@@ -1,0 +1,46 @@
+[gd_scene load_steps=2 format=3 uid="uid://1eml3sfpp73e"]
+
+[ext_resource type="Script" path="res://client/scenes/main_menu/components/JoinGameMenu.cs" id="1_1oufw"]
+
+[node name="JoinGameMenu" type="MarginContainer"]
+custom_minimum_size = Vector2(220, 0)
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -36.0
+offset_top = -21.5
+offset_right = 36.0
+offset_bottom = 21.5
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 4
+size_flags_vertical = 4
+script = ExtResource("1_1oufw")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Label" type="Label" parent="VBoxContainer/HBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "IP"
+
+[node name="IpEdit" type="LineEdit" parent="VBoxContainer/HBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 18
+
+[node name="JoinButton" type="Button" parent="VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Join game"
+
+[connection signal="pressed" from="VBoxContainer/JoinButton" to="." method="JoinGame"]

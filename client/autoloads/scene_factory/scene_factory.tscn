@@ -1,0 +1,10 @@
+[gd_scene load_steps=4 format=3 uid="uid://cqgawwppd6f7e"]
+
+[ext_resource type="Script" path="res://client/autoloads/scene_factory/SceneFactory.cs" id="1_8mxt8"]
+[ext_resource type="PackedScene" uid="uid://kscyw7ns0kiv" path="res://client/scenes/intro/intro.tscn" id="2_q87c0"]
+[ext_resource type="PackedScene" uid="uid://b6s4savshuyhb" path="res://client/scenes/main_menu/main_menu.tscn" id="3_mraxw"]
+
+[node name="SceneFactory" type="Node"]
+script = ExtResource("1_8mxt8")
+_intro = ExtResource("2_q87c0")
+_mainMenu = ExtResource("3_mraxw")

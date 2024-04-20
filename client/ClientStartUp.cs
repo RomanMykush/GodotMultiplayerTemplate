@@ -8,6 +8,13 @@ public partial class ClientStartUp : PlatformStartUp
 {
     public override void AfterReady()
     {
+        Node node;
+        // Skip intro if editor build
+        if (OS.HasFeature("editor"))
+            node = SceneFactory.Singleton.CreateMainMenu();
+        else node = SceneFactory.Singleton.CreateIntro();
+        SceneTransitioner.Singleton.TryChangeScene(node);
+
         GD.Print("Client started");
     }
 }

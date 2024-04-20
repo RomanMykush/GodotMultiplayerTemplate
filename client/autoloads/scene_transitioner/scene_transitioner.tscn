@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://bwu3gxq7k85xr"]
+
+[ext_resource type="Script" path="res://client/autoloads/scene_transitioner/SceneTransitioner.cs" id="1_7opo2"]
+
+[node name="SceneTransitioner" type="Node"]
+script = ExtResource("1_7opo2")
