@@ -48,12 +48,13 @@ unique_name_in_owner = true
 
 [node name="WaitingLayer" type="CanvasLayer" parent="."]
 unique_name_in_owner = true
+visible = false
 
 [node name="WaitingPanel" parent="WaitingLayer" instance=ExtResource("2_cvuxk")]
-offset_left = 466.0
-offset_top = 261.5
-offset_right = 686.0
-offset_bottom = 386.5
+offset_left = -110.0
+offset_top = -62.5
+offset_right = 110.0
+offset_bottom = 62.5
 
 [node name="WaitingAnimPlayer" type="AnimationPlayer" parent="."]
 unique_name_in_owner = true
