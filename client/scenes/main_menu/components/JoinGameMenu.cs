@@ -1,4 +1,5 @@
 using Godot;
+using SteampunkDnD.Shared;
 using System;
 
 namespace SteampunkDnD.Client;
@@ -11,6 +12,11 @@ public partial class JoinGameMenu : MarginContainer
 
     private void JoinGame()
     {
-        // TODO: Implement client creation
+        // TODO: Add more configurations
+        // Get configurations
+        var port = AppManager.Singleton.DefaultPort;
+        // Create client
+        var node = SceneFactory.Singleton.CreateMainClient(IpEdit.Text, port);
+        SceneTransitioner.Singleton.TryChangeScene(node);
     }
 }

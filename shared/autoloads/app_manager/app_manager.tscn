@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3 uid="uid://dlb4ek0eshrg8"]
+
+[ext_resource type="Script" path="res://shared/autoloads/app_manager/AppManager.cs" id="1_m3rqc"]
+
+[node name="AppManager" type="Node"]
+script = ExtResource("1_m3rqc")
+DefaultPort = 5144
+DefaultMaxPlayers = 4

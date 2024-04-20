@@ -1,11 +1,12 @@
-[gd_scene load_steps=5 format=3 uid="uid://c7dgf5bync2j1"]
+[gd_scene load_steps=6 format=3 uid="uid://c7dgf5bync2j1"]
 
 [ext_resource type="Script" path="res://client/ClientStartUp.cs" id="1_g74xa"]
 [ext_resource type="PackedScene" uid="uid://cqgawwppd6f7e" path="res://client/autoloads/scene_factory/scene_factory.tscn" id="2_2vh7v"]
+[ext_resource type="PackedScene" uid="uid://cwql1ah83m1d8" path="res://client/autoloads/message_box/message_box.tscn" id="2_gdchd"]
 [ext_resource type="PackedScene" uid="uid://fb77u8dpsgxv" path="res://client/autoloads/transition_ui/transition_ui.tscn" id="2_th4kk"]
 [ext_resource type="PackedScene" uid="uid://bwu3gxq7k85xr" path="res://client/autoloads/scene_transitioner/scene_transitioner.tscn" id="3_pmmsf"]
 
 [node name="ClientStartUp" type="Node"]
 script = ExtResource("1_g74xa")
 PhysicsTicksRate = 60
-Singletons = Array[PackedScene]([ExtResource("2_th4kk"), ExtResource("2_2vh7v"), ExtResource("3_pmmsf")])
+Singletons = Array[PackedScene]([ExtResource("2_gdchd"), ExtResource("2_th4kk"), ExtResource("2_2vh7v"), ExtResource("3_pmmsf")])

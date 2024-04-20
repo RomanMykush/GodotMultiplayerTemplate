@@ -17,4 +17,10 @@ public partial class SceneFactory : Node
 
     public Node CreateMainMenu() =>
         _mainMenu.Instantiate();
+
+    public Node CreateMainHost(int port, int maxClients) =>
+        MainGameHost.CreateHost(port, maxClients);
+
+    public Node CreateMainClient(string ip, int port) =>
+        MainGameClient.CreateClient(ip, port);
 }

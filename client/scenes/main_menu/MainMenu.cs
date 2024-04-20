@@ -1,4 +1,5 @@
 using Godot;
+using SteampunkDnD.Shared;
 using System;
 using System.Threading.Tasks;
 
@@ -77,4 +78,6 @@ public partial class MainMenu : Control
         // Play openning animation
         ContentAnimPlayer.Play("show_content");
     }
+
+    public void OnExit() => AppManager.Singleton.Exit();
 }

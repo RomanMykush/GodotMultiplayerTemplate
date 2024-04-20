@@ -1,0 +1,14 @@
+[gd_scene load_steps=3 format=3 uid="uid://cwql1ah83m1d8"]
+
+[ext_resource type="Script" path="res://client/autoloads/message_box/MessageBox.cs" id="1_pq7k6"]
+[ext_resource type="PackedScene" uid="uid://cr5cdr7mtwju6" path="res://client/autoloads/message_box/components/message_panel.tscn" id="2_1xwq4"]
+
+[node name="MessageBox" type="Node"]
+script = ExtResource("1_pq7k6")
+
+[node name="MessageLayer" type="CanvasLayer" parent="."]
+unique_name_in_owner = true
+visible = false
+
+[node name="MessagePanel" parent="MessageLayer" instance=ExtResource("2_1xwq4")]
+unique_name_in_owner = true
