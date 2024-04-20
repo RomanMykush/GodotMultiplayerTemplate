@@ -24,8 +24,8 @@ public partial class MainGameClient : Node, ILevel
 
     public virtual async Task<InitLevelResult> Initialize()
     {
-        // TODO: Implement client initialization
-        throw new NotImplementedException();
+        var result = await Network.Singleton.Connect(Address, Port);
+        return new InitLevelResult(result, "Failed to connect to server");
     }
 
     public IEnumerable<JobObserver> StartConstruction()

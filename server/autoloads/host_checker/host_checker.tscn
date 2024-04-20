@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://ca28lx0j3lseq"]
+
+[ext_resource type="Script" path="res://server/autoloads/host_checker/HostChecker.cs" id="1_rehe1"]
+
+[node name="HostChecker" type="Node"]
+script = ExtResource("1_rehe1")

@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://cadhwghhtu5d0"]
+
+[ext_resource type="Script" path="res://client/autoloads/network/Network.cs" id="1_r7a5o"]
+
+[node name="Network" type="Node"]
+script = ExtResource("1_r7a5o")
