@@ -5,8 +5,8 @@ namespace SteampunkDnD.Shared;
 
 public abstract partial class PlatformStartUp : Node
 {
-    [Export] public int PhysicsTicksRate;
-    [Export] public Godot.Collections.Array<PackedScene> Singletons { get; set; }
+    [Export] private int PhysicsTicksRate;
+    [Export] private Godot.Collections.Array<PackedScene> Singletons { get; set; }
 
     public override sealed void _Ready()
     {

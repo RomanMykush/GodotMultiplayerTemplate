@@ -7,8 +7,8 @@ namespace SteampunkDnD.Client;
 public partial class MainMenu : Control
 {
     // Exports
-    [Export] public PackedScene HostGameMenuScene;
-    [Export] public PackedScene JoinGameMenuScene;
+    [Export] private PackedScene HostGameMenuScene;
+    [Export] private PackedScene JoinGameMenuScene;
 
     // Child nodes
     private Control ContentContainer;
@@ -22,6 +22,7 @@ public partial class MainMenu : Control
 
     public override void _Ready()
     {
+        GD.Print("Main menu opened");
         ContentContainer = GetNode<Control>("%ContentContainer");
         SidePanelAnimPlayer = GetNode<AnimationPlayer>("%SidePanelAnimPlayer");
         ContentAnimPlayer = GetNode<AnimationPlayer>("%ContentAnimPlayer");

@@ -13,7 +13,7 @@ public partial class ClientStartUp : PlatformStartUp
         if (OS.HasFeature("editor"))
             node = SceneFactory.Singleton.CreateMainMenu();
         else node = SceneFactory.Singleton.CreateIntro();
-        SceneTransitioner.Singleton.TryChangeScene(node);
+        SceneTransitioner.Singleton.TryChangeScene(node, true);
 
         GD.Print("Client started");
     }

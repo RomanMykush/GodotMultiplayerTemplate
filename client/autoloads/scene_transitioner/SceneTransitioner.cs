@@ -17,7 +17,7 @@ public partial class SceneTransitioner : Node
 
     /// <summary> Request scene transition. </summary>
     /// <returns>true if started transition; otherwise false.</returns>
-    public bool TryChangeScene(Node node)
+    public bool TryChangeScene(Node node, bool skipTransition = false)
     {
         // Check if previous transition ended
         if (TransitionTask != null && !TransitionTask.IsCompleted)
@@ -27,12 +27,18 @@ public partial class SceneTransitioner : Node
             return false;
         }
         // Start transition to new scene
-        TransitionTask = ChangeScene(node);
+        TransitionTask = ChangeScene(node, skipTransition);
         return true;
     }
 
-    private async Task ChangeScene(Node node)
+    private async Task ChangeScene(Node node, bool skipTransition = false)
     {
+        if (!skipTransition)
+            await TransitionUi.Singleton.StartTransition("fade_black");
+
         await GetTree().ChangeSceneToNode(node);
+
+        if (!skipTransition)
+            await TransitionUi.Singleton.FinishTransition("fade_black");
     }
 }
