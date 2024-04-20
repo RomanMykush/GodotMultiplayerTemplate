@@ -10,13 +10,21 @@ namespace SteampunkDnD.Client;
 public partial class SceneTransitioner : Node
 {
     public static SceneTransitioner Singleton { get; private set; }
+
+    // Child nodes
     private Node JobObserversContainer;
+    private CanvasLayer WaitingLayer;
+    private AnimationPlayer WaitingAnimPlayer;
+
+    // Other properties
     private Task TransitionTask;
 
     public override void _Ready()
     {
         Singleton = this;
         JobObserversContainer = GetNode("%JobObserversContainer");
+        WaitingLayer = GetNode<CanvasLayer>("%WaitingLayer");
+        WaitingAnimPlayer = GetNode<AnimationPlayer>("%WaitingAnimPlayer");
     }
 
     /// <summary> Request scene transition. </summary>
@@ -41,13 +49,17 @@ public partial class SceneTransitioner : Node
         GD.Print($"Scene transition to {node.GetType().Name} started");
 
         var nextLevel = node as ILevel;
-        // Initialize level
         if (nextLevel != null)
         {
-            // TODO: Show loading dialog
+            // Show waiting panel
+            WaitingLayer.Show();
+            WaitingAnimPlayer.Play("show_waiting_panel");
+
+            // Initialize level
             var result = await nextLevel.Initialize();
             if (!result.IsSuccessful)
             {
+                WaitingLayer.Hide();
                 _ = MessageBox.Singleton.Show(result.Message);
                 return;
             }
@@ -56,6 +68,8 @@ public partial class SceneTransitioner : Node
         // Play start transition animation
         if (!skipTransition)
             await TransitionUi.Singleton.StartTransition("fade_black");
+
+        WaitingLayer.Hide();
 
         // Clean up previous level
         if (GetTree().CurrentScene is ILevel currentLevel)
