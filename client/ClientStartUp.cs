@@ -10,11 +10,11 @@ public partial class ClientStartUp : PlatformStartUp
     {
         Node node;
         // Skip intro if editor build
-        if (OS.HasFeature("editor"))
+        if (!OS.HasFeature("editor"))
             node = SceneFactory.Singleton.CreateMainMenu();
         else node = SceneFactory.Singleton.CreateIntro();
         SceneTransitioner.Singleton.TryChangeScene(node, true);
 
-        GD.Print("Client started");
+        Logger.Singleton.Log(LogLevel.Trace, "Client started");
     }
 }

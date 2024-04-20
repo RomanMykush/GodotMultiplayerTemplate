@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://7a6u7im2wbgx"]
+
+[ext_resource type="Script" path="res://shared/autoloads/logger/Logger.cs" id="1_pjpuv"]
+
+[node name="Logger" type="Node"]
+script = ExtResource("1_pjpuv")

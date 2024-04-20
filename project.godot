@@ -17,6 +17,7 @@ config/icon="res://icon.svg"
 
 [autoload]
 
+Logger="*res://shared/autoloads/logger/logger.tscn"
 AppManager="*res://shared/autoloads/app_manager/app_manager.tscn"
 
 [dotnet]

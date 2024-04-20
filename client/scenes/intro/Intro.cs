@@ -1,4 +1,5 @@
 using Godot;
+using SteampunkDnD.Shared;
 using System;
 
 namespace SteampunkDnD.Client;
@@ -7,7 +8,7 @@ public partial class Intro : Control
 {
     public override void _Ready()
     {
-        GD.Print("Intro started");
+        Logger.Singleton.Log(LogLevel.Info, "Intro started");
         GetNode<AnimationPlayer>("AnimationPlayer").Play("intro");
     }
 

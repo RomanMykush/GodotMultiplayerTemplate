@@ -8,6 +8,6 @@ public partial class ServerStartUp : PlatformStartUp
 {
     public override void AfterReady()
     {
-        GD.Print("Server started");
+        Logger.Singleton.Log(LogLevel.Trace, "Server started");
     }
 }

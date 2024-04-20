@@ -17,8 +17,16 @@ public partial class AppManager : Node
     public override void _Ready() =>
         Singleton = this;
 
+    public override void _Notification(int what)
+    {
+        if (what == NotificationWMCloseRequest)
+            Exit();
+    }
+
     public void Exit()
     {
+        Logger.Singleton.Log(LogLevel.Trace, "App shutdown");
+
         EmitSignal(SignalName.Exiting);
 
         if (GetTree().CurrentScene is ILevel level)

@@ -20,7 +20,7 @@ public partial class ClientLoadingBar : VBoxContainer
             // Unsubscribe from previous observer
             if (_observer != null)
             {
-                GD.PushWarning($"An instance of {nameof(ClientLoadingBar)} was already subscribed to other {nameof(ClientLoadingObserver)} and will unsubscribe from it");
+                Logger.Singleton.Log(LogLevel.Warning, $"An instance of {nameof(ClientLoadingBar)} was already subscribed to other {nameof(ClientLoadingObserver)} and will unsubscribe from it");
                 _observer.Updated -= OnUpdated;
                 _observer.Completed -= OnCompleted;
                 _observer.Failed -= OnFailed;

@@ -77,7 +77,7 @@ public partial class TransitionUi : Node
                     cleintLoadingBar.Observer = clientLoadingObserver;
                     break;
                 default:
-                    GD.PushWarning($"Unsupported {observer.GetType().Name} subtype of JobObserver was passed");
+                    Logger.Singleton.Log(LogLevel.Warning, $"Unsupported {observer.GetType().Name} subtype of JobObserver was passed");
                     break;
             }
         }
@@ -93,7 +93,7 @@ public partial class TransitionUi : Node
     {
         if (!TransitionAnimPlayer.HasAnimation(animationName))
         {
-            GD.PushWarning($"{animationName} animation does not exist");
+            Logger.Singleton.Log(LogLevel.Warning, $"{animationName} animation does not exist");
             animationName = DefaultAnimation;
         }
 

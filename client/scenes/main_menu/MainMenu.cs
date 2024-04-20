@@ -23,7 +23,7 @@ public partial class MainMenu : Control
 
     public override void _Ready()
     {
-        GD.Print("Main menu opened");
+        Logger.Singleton.Log(LogLevel.Info, "Main menu opened");
         ContentContainer = GetNode<Control>("%ContentContainer");
         SidePanelAnimPlayer = GetNode<AnimationPlayer>("%SidePanelAnimPlayer");
         ContentAnimPlayer = GetNode<AnimationPlayer>("%ContentAnimPlayer");

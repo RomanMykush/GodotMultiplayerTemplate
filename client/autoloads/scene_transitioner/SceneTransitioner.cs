@@ -31,11 +31,11 @@ public partial class SceneTransitioner : Node
     /// <returns>true if started transition; otherwise false.</returns>
     public bool TryChangeScene(Node node, bool skipTransition = false)
     {
-        GD.Print($"Trying to start transition to {node.GetType().Name}");
+        Logger.Singleton.Log(LogLevel.Trace, $"Trying to start transition to {node.GetType().Name}");
         // Check if previous transition ended
         if (TransitionTask != null && !TransitionTask.IsCompleted)
         {
-            GD.PushWarning("Tried start scene transition while other one in progress");
+            Logger.Singleton.Log(LogLevel.Warning, "Tried to start scene transition while other one in progress");
             node.QueueFree();
             return false;
         }
@@ -46,7 +46,7 @@ public partial class SceneTransitioner : Node
 
     private async Task ChangeScene(Node node, bool skipTransition = false)
     {
-        GD.Print($"Scene transition to {node.GetType().Name} started");
+        Logger.Singleton.Log(LogLevel.Trace, $"Scene transition to {node.GetType().Name} started");
 
         var nextLevel = node as ILevel;
         if (nextLevel != null)
@@ -118,6 +118,6 @@ public partial class SceneTransitioner : Node
         if (!skipTransition)
             await TransitionUi.Singleton.FinishTransition("fade_black");
 
-        GD.Print($"Scene transition to {node.GetType().Name} completed");
+        Logger.Singleton.Log(LogLevel.Trace, $"Scene transition to {node.GetType().Name} completed");
     }
 }

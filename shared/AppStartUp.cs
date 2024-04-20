@@ -22,7 +22,7 @@ public partial class AppStartUp : Node
 #else               // Start as client
         StartUp(ClientStartUpPath);
 #endif
-        GD.Print("App started");
+        Logger.Singleton.Log(LogLevel.Trace, "App started");
     }
 
     private void StartUp(string path) =>

@@ -1,4 +1,5 @@
 using Godot;
+using SteampunkDnD.Shared;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -21,10 +22,10 @@ public partial class Network : Node
 
     public async Task<bool> Connect(string address, int port)
     {
-        GD.Print($"Trying to connect to server");
+        Logger.Singleton.Log(LogLevel.Info, $"Trying to connect to server");
         if (IsBusy())
         {
-            GD.PushWarning("Connecting to server while connected/connecting to other");
+            Logger.Singleton.Log(LogLevel.Warning, "Connecting to server while connected/connecting to other");
             Disconnect();
         }
 
@@ -60,8 +61,8 @@ public partial class Network : Node
 
         // Log result
         if (index == 0)
-            GD.Print($"Successfully established connection");
-        else GD.Print($"Failed to establish connection");
+            Logger.Singleton.Log(LogLevel.Info, $"Successfully established connection");
+        else Logger.Singleton.Log(LogLevel.Info, $"Failed to establish connection");
 
         return index == 0;
     }

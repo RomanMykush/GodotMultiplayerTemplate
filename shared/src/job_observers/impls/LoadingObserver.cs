@@ -12,7 +12,7 @@ public partial class LoadingObserver : JobObserver
     {
         if (string.IsNullOrEmpty(ResourcePath))
         {
-            GD.PushError("ResourcePath was not set");
+            Logger.Singleton.Log(LogLevel.Error, "ResourcePath was not set");
             return;
         }
 
@@ -37,11 +37,11 @@ public partial class LoadingObserver : JobObserver
                     EmitSignal(SignalName.Completed);
                     break;
                 case ResourceLoader.ThreadLoadStatus.Failed:
-                    GD.PushError("Failed to load resource");
+                    Logger.Singleton.Log(LogLevel.Error, "Failed to load resource");
                     EmitSignal(SignalName.Failed);
                     break;
                 case ResourceLoader.ThreadLoadStatus.InvalidResource:
-                    GD.PushError("Invalid ResourcePath specified");
+                    Logger.Singleton.Log(LogLevel.Error, "Invalid ResourcePath specified");
                     EmitSignal(SignalName.Failed);
                     break;
             }
