@@ -19,7 +19,7 @@ public partial class Logger : Node
             LogLevel.Error => "[color=red]ERROR",
             LogLevel.Warning => "[color=gold]WARN",
             LogLevel.Info => "[color=skyblue]INFO",
-            LogLevel.Debug => "[color=slateblue]DEBUG",
+            LogLevel.Debug => "[color=purple]DEBUG",
             LogLevel.Trace => "[color=gray]TRACE",
             _ => throw new NotImplementedException("This value of LogLevel was not implemented")
         };
