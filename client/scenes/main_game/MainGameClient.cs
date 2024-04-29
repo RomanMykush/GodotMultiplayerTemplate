@@ -11,15 +11,10 @@ public partial class MainGameClient : Node, ILevel
     public string Address { get; protected set; }
     public int Port { get; protected set; }
 
-    protected MainGameClient() { }
-
-    public static MainGameClient CreateClient(string address, int port)
+    public void SetupClient(string address, int port)
     {
-        return new MainGameClient()
-        {
-            Address = address,
-            Port = port
-        };
+        Address = address;
+        Port = port;
     }
 
     public virtual async Task<InitLevelResult> Initialize()
