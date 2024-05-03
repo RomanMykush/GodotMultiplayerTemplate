@@ -1,4 +1,5 @@
 using Godot;
+using MemoryPack;
 using SteampunkDnD.Shared;
 using System;
 using System.Threading;
@@ -9,11 +10,16 @@ namespace SteampunkDnD.Client;
 public partial class Network : Node
 {
     public static Network Singleton { get; private set; }
+    [Signal] public delegate void MessageReceivedEventHandler(GodotWrapper<IMessage> message);
 
     public override void _Ready()
     {
         Singleton = this;
+        // Subsribe to events
         Multiplayer.ConnectionFailed += Disconnect;
+        if (Multiplayer is SceneMultiplayer sceneMultiplayer)
+            sceneMultiplayer.PeerPacket += OnPacketReceived;
+        else Logger.Singleton.Log(LogLevel.Error, "Property Multiplayer does not contain an instance of SceneMultiplayer");
     }
 
     /// <returns>true if trying to establish connect or already connected to server; otherwise false.</returns>
@@ -69,4 +75,18 @@ public partial class Network : Node
 
     public void Disconnect() =>
         Multiplayer.MultiplayerPeer = null;
+
+    public void SendPacket(IMessage message, MultiplayerPeer.TransferModeEnum mode = MultiplayerPeer.TransferModeEnum.Unreliable)
+    {
+        byte[] data = MemoryPackSerializer.Serialize(message);
+        var transmitter = Multiplayer as SceneMultiplayer;
+        // TODO: Add channels mapping to IMessage implementation type for faster Reliable and UnreliableOrdered transfer modes
+        transmitter.SendBytes(data, 1, mode, 0);
+    }
+
+    private void OnPacketReceived(long id, byte[] data)
+    {
+        var message = MemoryPackSerializer.Deserialize<IMessage>(data);
+        EmitSignal(SignalName.MessageReceived, new GodotWrapper<IMessage>(message));
+    }
 }
