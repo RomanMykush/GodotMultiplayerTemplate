@@ -8,24 +8,19 @@ namespace SteampunkDnD.Server;
 public partial class Network : Node
 {
     public static Network Singleton { get; private set; }
-    [Export] public int DefaultPort { get; set; }
-    [Export] public int DefaultMaxPlayers { get; set; }
-
     [Signal] public delegate void MessageReceivedEventHandler(int peer, GodotWrapper<IMessage> message);
 
     public override void _Ready()
     {
         Singleton = this;
-        // Get port
-        int port = DefaultPort;
-        if (CmdUtils.GetParameterValue("-p", out int value))
-            port = value;
+        // Subsribe to messages
+        if (Multiplayer is SceneMultiplayer sceneMultiplayer)
+            sceneMultiplayer.PeerPacket += OnPacketReceived;
+        else Logger.Singleton.Log(LogLevel.Error, "Property Multiplayer does not contain an instance of SceneMultiplayer");
+    }
 
-        // Get max players
-        int maxPlayers = DefaultMaxPlayers;
-        if (CmdUtils.GetParameterValue("-n", out value))
-            maxPlayers = value;
-
+    public void StartServer(int port, int maxPlayers)
+    {
         // Start ENet server
         ENetMultiplayerPeer peer = new();
         peer.CreateServer(port, maxPlayers);
