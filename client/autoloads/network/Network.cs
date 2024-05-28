@@ -10,7 +10,7 @@ namespace SteampunkDnD.Client;
 public partial class Network : Node
 {
     public static Network Singleton { get; private set; }
-    [Signal] public delegate void MessageReceivedEventHandler(GodotWrapper<IMessage> message);
+    [Signal] public delegate void MessageReceivedEventHandler(GodotWrapper<INetworkMessage> message);
 
     public override void _Ready()
     {
@@ -76,17 +76,17 @@ public partial class Network : Node
     public void Disconnect() =>
         Multiplayer.MultiplayerPeer = null;
 
-    public void SendPacket(IMessage message, MultiplayerPeer.TransferModeEnum mode = MultiplayerPeer.TransferModeEnum.Unreliable)
+    public void SendPacket(INetworkMessage message, MultiplayerPeer.TransferModeEnum mode = MultiplayerPeer.TransferModeEnum.Unreliable)
     {
         byte[] data = MemoryPackSerializer.Serialize(message);
         var transmitter = Multiplayer as SceneMultiplayer;
-        // TODO: Add channels mapping to IMessage implementation type for faster Reliable and UnreliableOrdered transfer modes
+        // TODO: Add channels mapping to INetworkMessage implementation type for faster Reliable and UnreliableOrdered transfer modes
         transmitter.SendBytes(data, 1, mode, 0);
     }
 
     private void OnPacketReceived(long id, byte[] data)
     {
-        var message = MemoryPackSerializer.Deserialize<IMessage>(data);
-        EmitSignal(SignalName.MessageReceived, new GodotWrapper<IMessage>(message));
+        var message = MemoryPackSerializer.Deserialize<INetworkMessage>(data);
+        EmitSignal(SignalName.MessageReceived, new GodotWrapper<INetworkMessage>(message));
     }
 }

@@ -5,4 +5,4 @@ using System;
 namespace SteampunkDnD.Shared;
 
 [MemoryPackable]
-public partial interface IMessage { }
+public partial interface INetworkMessage { }
