@@ -1,6 +1,9 @@
-[gd_scene load_steps=2 format=3 uid="uid://di11p6slhflx2"]
+[gd_scene load_steps=3 format=3 uid="uid://di11p6slhflx2"]
 
 [ext_resource type="Script" path="res://client/scenes/main_game/MainGameClient.cs" id="1_m143c"]
+[ext_resource type="PackedScene" uid="uid://d4fs1ud6v4y5r" path="res://client/scenes/main_game/components/synchronizer.tscn" id="2_2y4eb"]
 
 [node name="MainGameClient" type="Node"]
 script = ExtResource("1_m143c")
+
+[node name="Synchronizer" parent="." instance=ExtResource("2_2y4eb")]
