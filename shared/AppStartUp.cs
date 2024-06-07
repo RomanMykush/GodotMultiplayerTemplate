@@ -26,5 +26,5 @@ public partial class AppStartUp : Node
     }
 
     private void StartUp(string path) =>
-        Callable.From(() => GetTree().ChangeSceneToFile(path)).CallDeferred();
+        DeferredUtils.CallDeferred(() => GetTree().ChangeSceneToFile(path));
 }

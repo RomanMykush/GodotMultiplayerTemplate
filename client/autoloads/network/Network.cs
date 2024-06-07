@@ -2,7 +2,6 @@ using Godot;
 using MemoryPack;
 using SteampunkDnD.Shared;
 using System;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace SteampunkDnD.Client;
@@ -35,10 +34,7 @@ public partial class Network : Node
             Disconnect();
         }
 
-        var semaphore = new SemaphoreSlim(0, 1);
-        bool connectionStarted = false;
-        // Request deffered start of connection
-        Callable.From(() =>
+        bool connectionStarted = await DeferredUtils.RunDeferred(() =>
         {
             ENetMultiplayerPeer peer = new();
             var clientStatus = peer.CreateClient(address, port);
@@ -46,12 +42,9 @@ public partial class Network : Node
             if (clientStatus == Error.Ok)
                 Multiplayer.MultiplayerPeer = peer;
             // Return result
-            connectionStarted = clientStatus == Error.Ok;
-            semaphore.Release();
-        }).CallDeferred();
+            return clientStatus == Error.Ok;
+        });
 
-        // Wait for connection to start
-        await semaphore.WaitAsync();
         if (!connectionStarted)
             return false;
 
