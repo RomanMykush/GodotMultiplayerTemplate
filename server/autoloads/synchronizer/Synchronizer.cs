@@ -1,7 +1,6 @@
 using Godot;
 using SteampunkDnD.Shared;
 using System;
-using System.Threading.Tasks;
 
 namespace SteampunkDnD.Server;
 
@@ -18,10 +17,15 @@ public partial class Synchronizer : Node
         // Subscribe to events
         Network.Singleton.MessageReceived += (peer, msg) =>
         {
-            if (msg.Value is Sync sync)
+            switch (msg.Value) {
+            case Sync sync:
                 OnSyncReceived(peer, sync);
+                break;
+            case SyncInfoRequest decimalValue:
+                OnSyncInfoRequestReceived(peer);
+                break;
+            }
         };
-        Multiplayer.PeerConnected += OnPeerConnected;
     }
 
     public override void _PhysicsProcess(double delta)
@@ -36,12 +40,10 @@ public partial class Synchronizer : Node
         Network.Singleton.SendPacket(peer, reply);
     }
 
-    private async void OnPeerConnected(long peer)
+    private void OnSyncInfoRequestReceived(int peer)
     {
-        await Task.Delay(500); // TODO: Replace with a better solution for client initialization
-
         var tickRate = Engine.PhysicsTicksPerSecond;
         var syncInfo = new SyncInfo(tickRate);
-        Network.Singleton.SendPacket((int)peer, syncInfo);
+        Network.Singleton.SendPacket(peer, syncInfo);
     }
 }

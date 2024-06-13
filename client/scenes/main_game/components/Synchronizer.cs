@@ -3,7 +3,6 @@ using SteampunkDnD.Shared;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace SteampunkDnD.Client;
 
@@ -41,12 +40,19 @@ public partial class Synchronizer : Node, IInitializable
     {
         // Wait for SyncInfo
         SyncInfo syncInfo = null;
-        var syncInfoAwaiter = ToSignal(Network.Singleton, Network.SignalName.MessageReceived); // ToSignal never receives signal if created deferred
         var syncInfoReceiveJob = new AtomicJob(async () =>
         {
+            // Send sync info request
+            DeferredUtils.CallDeferred(() =>
+            {
+                var syncInfoRequest = new SyncInfoRequest();
+                Network.Singleton.SendPacket(syncInfoRequest, MultiplayerPeer.TransferModeEnum.Reliable);
+            });
+            // Wait for SyncInfo message to arrive
             while (syncInfo == null)
             {
-                var args = await syncInfoAwaiter;
+                var awaiter = await DeferredUtils.RunDeferred(() => ToSignal(Network.Singleton, Network.SignalName.MessageReceived));
+                var args = await awaiter;
                 var wrapper = (GodotWrapper<INetworkMessage>)args[0];
                 syncInfo = wrapper.Value as SyncInfo;
             }
