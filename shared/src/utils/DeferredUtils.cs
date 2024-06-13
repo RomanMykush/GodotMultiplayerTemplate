@@ -14,13 +14,39 @@ public static class DeferredUtils
         // Request deferred task
         Callable.From(() =>
         {
-            result = func();
-            semaphore.Release();
+            try
+            {
+                result = func();
+            }
+            finally
+            {
+                semaphore.Release();
+            }
         }).CallDeferred();
 
         // Wait for deferred task to finish
         await semaphore.WaitAsync();
         return result;
+    }
+
+    public static async Task RunDeferred(Action action)
+    {
+        var semaphore = new SemaphoreSlim(0, 1);
+        // Request deferred task
+        Callable.From(() =>
+        {
+            try
+            {
+                action();
+            }
+            finally
+            {
+                semaphore.Release();
+            }
+        }).CallDeferred();
+
+        // Wait for deferred task to finish
+        await semaphore.WaitAsync();
     }
 
     public static void CallDeferred(Action action) =>

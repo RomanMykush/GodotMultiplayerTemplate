@@ -49,21 +49,22 @@ public partial class Network : Node
             return false;
 
         // Wait for connection to finish
-        int index = -1;
-        var multiplayer = Multiplayer; // workaround error
-        await Task.Run(() =>
-        {
-            index = Task.WaitAny(
-                    Task.Run(async () => await multiplayer.ToSignal(multiplayer, MultiplayerApi.SignalName.ConnectedToServer)),
-                    Task.Run(async () => await multiplayer.ToSignal(multiplayer, MultiplayerApi.SignalName.ConnectionFailed)));
-        });
+        var successAwaiter = await DeferredUtils.RunDeferred(() => ToSignal(Multiplayer, MultiplayerApi.SignalName.ConnectedToServer));
+        var failAwaiter = await DeferredUtils.RunDeferred(() => ToSignal(Multiplayer, MultiplayerApi.SignalName.ConnectionFailed));
+        var successTask = Task.Run(async () => await successAwaiter);
+        var failTask = Task.Run(async () => await failAwaiter);
+
+        await Task.WhenAny(successTask, failTask);
 
         // Log result
-        if (index == 0)
+        if (successTask.IsCompletedSuccessfully)
+        {
             Logger.Singleton.Log(LogLevel.Info, $"Successfully established connection");
-        else Logger.Singleton.Log(LogLevel.Info, $"Failed to establish connection");
+            return true;
+        }
+        Logger.Singleton.Log(LogLevel.Info, $"Failed to establish connection");
 
-        return index == 0;
+        return false;
     }
 
     public void Disconnect() =>
