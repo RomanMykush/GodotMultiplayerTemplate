@@ -11,28 +11,28 @@ public partial class ClientLoadingBar : VBoxContainer
     private Label Description;
 
     // Other properties
-    private ClientLoadingObserver _observer;
-    public ClientLoadingObserver Observer
+    private ClientLoadingInfo _jobInfo;
+    public ClientLoadingInfo JobInfo
     {
-        get => _observer;
+        get => _jobInfo;
         set
         {
             // Unsubscribe from previous observer
-            if (_observer != null)
+            if (_jobInfo != null)
             {
-                Logger.Singleton.Log(LogLevel.Warning, $"An instance of {nameof(ClientLoadingBar)} was already subscribed to other {nameof(ClientLoadingObserver)} and will unsubscribe from it");
-                _observer.Updated -= OnUpdated;
-                _observer.Completed -= OnCompleted;
-                _observer.Failed -= OnFailed;
+                Logger.Singleton.Log(LogLevel.Warning, $"An instance of {nameof(ClientLoadingBar)} was already subscribed to other {nameof(ClientLoadingInfo)} and will unsubscribe from it");
+                _jobInfo.Job.Updated -= OnUpdated;
+                _jobInfo.Job.Completed -= OnCompleted;
+                _jobInfo.Job.Failed -= OnFailed;
             }
-            _observer = value;
+            _jobInfo = value;
             // Subscribe to new one
-            _observer.Updated += OnUpdated;
-            _observer.Completed += OnCompleted;
-            _observer.Failed += OnFailed;
-            // Set client name
+            _jobInfo.Job.Updated += OnUpdated;
+            _jobInfo.Job.Completed += OnCompleted;
+            _jobInfo.Job.Failed += OnFailed;
+            // _jobInfo client name
             // TODO: Implement client name fetching
-            GetNode<Label>("%Name").Text = Observer.ClientId.ToString();
+            GetNode<Label>("%Name").Text = _jobInfo.ClientId.ToString();
         }
     }
 
@@ -42,10 +42,10 @@ public partial class ClientLoadingBar : VBoxContainer
         Description = GetNode<Label>("%Description");
     }
 
-    private void OnUpdated(GodotWrapper<JobMetric> jobsMetric)
+    private void OnUpdated(GodotWrapper<JobMetric> wrapper)
     {
-        var value = jobsMetric.Value;
-        LoadingBar.Value = value.ProgressPercent;
+        var value = wrapper.Value;
+        LoadingBar.Value = value.ProgressPercent * 100;
         Description.Text = value.Description;
     }
 

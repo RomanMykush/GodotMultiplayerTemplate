@@ -56,28 +56,27 @@ public partial class TransitionUi : Node
         ClearProgressBars();
     }
 
-    public void UpdateProgressBars(IEnumerable<JobObserver> jobObservers)
+    public void UpdateProgressBars(IEnumerable<JobInfo> jobInfos)
     {
         ClearProgressBars();
 
-        // Add progress bar for each passed JobObserver
-        foreach (var observer in jobObservers)
+        // Add progress bar for each passed JobInfo
+        foreach (var info in jobInfos)
         {
-            switch (observer)
+            switch (info)
             {
-                case LoadingObserver:
-                case GeneratorObserver:
+                case LoadingInfo:
                     var loadingBar = LevelBarScene.Instantiate<LevelLoadingBar>();
                     LoadingBarsContainer.AddChild(loadingBar);
-                    loadingBar.Observer = observer;
+                    loadingBar.JobInfo = info;
                     break;
-                case ClientLoadingObserver clientLoadingObserver:
+                case ClientLoadingInfo clientLoadingObserver:
                     var cleintLoadingBar = ClientBarScene.Instantiate<ClientLoadingBar>();
                     ClientBarsContainer.AddChild(cleintLoadingBar);
-                    cleintLoadingBar.Observer = clientLoadingObserver;
+                    cleintLoadingBar.JobInfo = clientLoadingObserver;
                     break;
                 default:
-                    Logger.Singleton.Log(LogLevel.Warning, $"Unsupported {observer.GetType().Name} subtype of JobObserver was passed");
+                    Logger.Singleton.Log(LogLevel.Warning, $"Unsupported {info.GetType().Name} subtype of {nameof(JobInfo)} was passed");
                     break;
             }
         }

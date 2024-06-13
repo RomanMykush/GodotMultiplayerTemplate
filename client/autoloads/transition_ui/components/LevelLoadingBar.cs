@@ -11,25 +11,25 @@ public partial class LevelLoadingBar : HBoxContainer
     private Label Description;
 
     // Other properties
-    private JobObserver _observer;
-    public JobObserver Observer
+    private JobInfo _jobInfo;
+    public JobInfo JobInfo
     {
-        get => _observer;
+        get => _jobInfo;
         set
         {
             // Unsubscribe from previous observer
-            if (_observer != null)
+            if (_jobInfo != null)
             {
-                Logger.Singleton.Log(LogLevel.Warning, $"An instance of {nameof(LevelLoadingBar)} was already subscribed to other {nameof(JobObserver)} and will unsubscribe from it");
-                _observer.Updated -= OnUpdated;
-                _observer.Completed -= OnCompleted;
-                _observer.Failed -= OnFailed;
+                Logger.Singleton.Log(LogLevel.Warning, $"An instance of {nameof(LevelLoadingBar)} was already subscribed to other {nameof(JobInfo)} and will unsubscribe from it");
+                _jobInfo.Job.Updated -= OnUpdated;
+                _jobInfo.Job.Completed -= OnCompleted;
+                _jobInfo.Job.Failed -= OnFailed;
             }
-            _observer = value;
+            _jobInfo = value;
             // Subscribe to new one
-            _observer.Updated += OnUpdated;
-            _observer.Completed += OnCompleted;
-            _observer.Failed += OnFailed;
+            _jobInfo.Job.Updated += OnUpdated;
+            _jobInfo.Job.Completed += OnCompleted;
+            _jobInfo.Job.Failed += OnFailed;
         }
     }
 
@@ -39,10 +39,10 @@ public partial class LevelLoadingBar : HBoxContainer
         Description = GetNode<Label>("%Description");
     }
 
-    private void OnUpdated(GodotWrapper<JobMetric> jobsMetric)
+    private void OnUpdated(GodotWrapper<JobMetric> wrapper)
     {
-        var value = jobsMetric.Value;
-        LoadingBar.Value = value.ProgressPercent;
+        var value = wrapper.Value;
+        LoadingBar.Value = value.ProgressPercent * 100;
         Description.Text = value.Description;
     }
 

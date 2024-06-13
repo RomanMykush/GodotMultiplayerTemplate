@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace SteampunkDnD.Client;
 
-public partial class Synchronizer : Node
+public partial class Synchronizer : Node, IInitializable
 {
     // Signals
     [Signal] public delegate void TickUpdatedEventHandler(int currentTick, float tickDuration);
@@ -25,7 +25,7 @@ public partial class Synchronizer : Node
     public float PredictionTimeScale { get; private set; }
     private readonly Queue<uint> LatencySamples = new(); // Latency samples of Sync message in milliseconds
 
-    public async override void _Ready()
+    public override void _Ready()
     {
         ProcessMode = ProcessModeEnum.Disabled;
 
@@ -35,53 +35,74 @@ public partial class Synchronizer : Node
             return;
         }
         SyncCurve.Bake();
+    }
 
-        var awaiter = ToSignal(Network.Singleton, Network.SignalName.MessageReceived);
-
-        await Task.Run(async () =>
+    public IEnumerable<JobInfo> ConstructInitJobs()
+    {
+        // Wait for SyncInfo
+        SyncInfo syncInfo = null;
+        var syncInfoAwaiter = ToSignal(Network.Singleton, Network.SignalName.MessageReceived); // ToSignal never receives signal if created deferred
+        var syncInfoReceiveJob = new AtomicJob(async () =>
         {
-            // Await SyncInfo message from server
-            SyncInfo syncInfo;
-            while (true)
+            while (syncInfo == null)
             {
-                var args = await awaiter;
+                var args = await syncInfoAwaiter;
                 var wrapper = (GodotWrapper<INetworkMessage>)args[0];
                 syncInfo = wrapper.Value as SyncInfo;
-                if (syncInfo != null)
-                    break;
-                awaiter = ToSignal(Network.Singleton, Network.SignalName.MessageReceived);
             }
+        })
+        { SuccessMessage = "Synchronization info received" };
 
+        syncInfoReceiveJob.Completed += () =>
+        {
             // Set tick rate
             PredictionTick = new Tick((uint)syncInfo.ServerTicksPerSecond);
+        };
 
-            // Populate LatencySamples with data
-            for (int i = 0; i < MinSampleSize; i++)
+        // Start populating LatencySamples with data
+        var jobs = new Dictionary<Job, float>() { {syncInfoReceiveJob, MinSampleSize} };
+        Sync latestSync = null;
+        for (int i = 0; i < MinSampleSize; i++)
+        {
+            var syncReceiveJob = new AtomicJob(async () =>
             {
-                var sync = new Sync((uint)Time.GetTicksMsec(), 0);
-                Network.Singleton.SendPacket(sync, MultiplayerPeer.TransferModeEnum.Reliable);
-            }
-            // Wait for data to arrive
-            int syncReceived = 0;
-            while (syncReceived < MinSampleSize)
-            {
-                var args = await ToSignal(Network.Singleton, Network.SignalName.MessageReceived);
-                var wrapper = (GodotWrapper<INetworkMessage>)args[0];
-                var sync = wrapper.Value as Sync;
-                if (sync == null)
-                    continue;
-
-                syncReceived++;
-                if (syncReceived == MinSampleSize)
+                // Send sync message
+                DeferredUtils.CallDeferred(() =>
                 {
-                    OnSyncReceived(sync);
-                    ProcessMode = ProcessModeEnum.Always;
-                    continue;
+                    var sync = new Sync((uint)Time.GetTicksMsec(), 0);
+                    Network.Singleton.SendPacket(sync, MultiplayerPeer.TransferModeEnum.Reliable);
+                });
+                // Wait for Sync message to arrive
+                Sync sync = null;
+                while (sync == null)
+                {
+                    // NOTE: Based on observations, execution of deferred calls starts before execution of signal handlers
+                    var awaiter = await DeferredUtils.RunDeferred(() => ToSignal(Network.Singleton, Network.SignalName.MessageReceived));
+                    var args = await awaiter;
+                    var wrapper = (GodotWrapper<INetworkMessage>)args[0];
+                    sync = wrapper.Value as Sync;
                 }
-
+                // Save latency to collection
                 uint avarageLatency = ((uint)Time.GetTicksMsec() - sync.ClientTime) / 2;
                 LatencySamples.Enqueue(avarageLatency);
-            }
+                // Set as latest Sync message
+                latestSync = sync;
+            })
+            { SuccessMessage = "Synchronization in process..." };
+
+            jobs.Add(syncReceiveJob, 1);
+        }
+
+        // Combine jobs
+        var combinedJobs = new ConcurrentJob(jobs) { SuccessMessage = "Synchronization complete" };
+        // Finish initialization
+        combinedJobs.Completed += () =>
+        {
+            // Synchronize prediction tick
+            var preferredTick = CalculatePreferredTick(latestSync.ServerTick);
+            CatchUpPrediction(preferredTick);
+
+            ProcessMode = ProcessModeEnum.Always;
 
             // Start timer
             GetNode<Timer>("%SyncTimer").Start();
@@ -92,7 +113,9 @@ public partial class Synchronizer : Node
                 if (msg.Value is Sync sync)
                     OnSyncReceived(sync);
             };
-        });
+        };
+
+        return new List<JobInfo>() { new(combinedJobs) };
     }
 
     public override void _Process(double delta)
@@ -117,6 +140,13 @@ public partial class Synchronizer : Node
         if (LatencySamples.Count > SampleSize)
             LatencySamples.Dequeue();
 
+        // Synchronize prediction tick
+        var preferredTick = CalculatePreferredTick(sync.ServerTick);
+        CatchUpPrediction(preferredTick);
+    }
+
+    private Tick CalculatePreferredTick(uint serverTick)
+    {
         // Calculate numerical characteristics of distribution in ms
         float mathExp = (float)LatencySamples.Sum(x => x) / LatencySamples.Count;
         float disp = LatencySamples.Sum(x => { float res = x - mathExp; return res * res; }) / (LatencySamples.Count - 1);
@@ -125,14 +155,12 @@ public partial class Synchronizer : Node
         // Set jitter as 99.7% of distribution (or 3 standart deviations)
         float jitter = 3 * std;
 
-        // Synchronize prediction tick
+        // Calculate optional buffer
         uint tickBuffer = Math.Max(MinimumTickBuffer,
             (uint)Mathf.Ceil(jitter / 1000f * PredictionTick.TickRate)); // Buffer for input messages to reach server
 
-        var preferredTick = new Tick(PredictionTick.TickRate) { CurrentTick = sync.ServerTick + tickBuffer }
+        return new Tick(PredictionTick.TickRate) { CurrentTick = serverTick + tickBuffer }
             .AddDuration(mathExp / 1000f);
-
-        CatchUpPrediction(preferredTick);
     }
 
     private void CatchUpPrediction(Tick preferredTick)

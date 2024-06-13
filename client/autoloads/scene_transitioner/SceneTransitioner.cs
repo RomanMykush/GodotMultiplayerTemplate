@@ -1,7 +1,6 @@
 using Godot;
 using SteampunkDnD.Shared;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -12,7 +11,6 @@ public partial class SceneTransitioner : Node
     public static SceneTransitioner Singleton { get; private set; }
 
     // Child nodes
-    private Node JobObserversContainer;
     private CanvasLayer WaitingLayer;
     private AnimationPlayer WaitingAnimPlayer;
 
@@ -22,7 +20,6 @@ public partial class SceneTransitioner : Node
     public override void _Ready()
     {
         Singleton = this;
-        JobObserversContainer = GetNode("%JobObserversContainer");
         WaitingLayer = GetNode<CanvasLayer>("%WaitingLayer");
         WaitingAnimPlayer = GetNode<AnimationPlayer>("%WaitingAnimPlayer");
     }
@@ -55,8 +52,8 @@ public partial class SceneTransitioner : Node
             WaitingLayer.Show();
             WaitingAnimPlayer.Play("show_waiting_panel");
 
-            // Initialize level
-            var result = await nextLevel.Initialize();
+            // Pre-initialize level
+            var result = await nextLevel.PreInitialize();
             if (!result.IsSuccessful)
             {
                 WaitingLayer.Hide();
@@ -78,32 +75,26 @@ public partial class SceneTransitioner : Node
         // Set new scene
         await GetTree().ChangeSceneToNode(node);
 
-        // Start level construction and wait for its success or fail
+        // Initialize level
         if (nextLevel != null)
         {
-            var observers = nextLevel.StartConstruction();
-            if (observers.Any())
+            var jobInfos = nextLevel.ConstructInitJobs();
+            if (jobInfos.Any())
             {
-                foreach (var observer in observers)
-                    JobObserversContainer.AddChild(observer);
-
                 // Update transition UI
-                TransitionUi.Singleton.UpdateProgressBars(observers);
+                TransitionUi.Singleton.UpdateProgressBars(jobInfos);
 
-                // Start monitoring jobs completion
-                var successTasks = new List<Task>();
-                var failTasks = new List<Task>();
-                foreach (var observer in observers) // can potentially cause task memory leak as some will never be finished, but will lose all strong references so i don't know exactly...
+                // Start initialization jobs
+                var tasks = jobInfos.Select(ji => JobHost.Singleton.RunJob(ji.Job));
+
+                try
                 {
-                    successTasks.Add(Task.Run(async () => await ToSignal(observer, JobObserver.SignalName.Completed)));
-                    failTasks.Add(Task.Run(async () => await ToSignal(observer, JobObserver.SignalName.Failed)));
+                    // Wait for jobs to complete
+                    await Task.WhenAll(tasks);
                 }
-
-                // Wait for jobs to complete
-                int index = Task.WaitAny(Task.WhenAll(successTasks), Task.WhenAny(failTasks));
-                // On fail, redirect player to main menu
-                if (index == 1)
+                catch (Exception)
                 {
+                    // TODO: Add more meaningful message
                     await MessageBox.Singleton.Show("Something went wrong").ContinueWith((task) =>
                     {
                         var node = SceneFactory.Singleton.CreateMainMenu();

@@ -1,15 +1,13 @@
 using Godot;
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace SteampunkDnD.Shared;
 
-public record InitLevelResult(bool IsSuccessful, string Message);
+public record PreInitResult(bool IsSuccessful, string Message);
 
-public interface ILevel
+public interface ILevel : IInitializable
 {
-    public Task<InitLevelResult> Initialize();
-    public IEnumerable<JobObserver> StartConstruction();
+    public Task<PreInitResult> PreInitialize();
     public void CleanUp();
 }

@@ -29,6 +29,7 @@ public partial class Logger : Node
             case LogLevel.Fatal:
             case LogLevel.Error:
                 GD.PushError(message);
+                // TODO: Add error log saving to file
                 break;
             case LogLevel.Warning:
                 GD.PushWarning(message);

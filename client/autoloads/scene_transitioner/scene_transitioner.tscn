@@ -3,6 +3,21 @@
 [ext_resource type="Script" path="res://client/autoloads/scene_transitioner/SceneTransitioner.cs" id="1_7opo2"]
 [ext_resource type="PackedScene" uid="uid://vrj2bdapqnaw" path="res://client/autoloads/scene_transitioner/components/waiting_panel.tscn" id="2_cvuxk"]
 
+[sub_resource type="Animation" id="Animation_ymwsg"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("WaitingLayer/WaitingPanel:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Vector2(466, 261.5)]
+}
+
 [sub_resource type="Animation" id="Animation_pboss"]
 resource_name = "show_waiting_panel"
 length = 0.8
@@ -19,21 +34,6 @@ tracks/0/keys = {
 "values": [Vector2(466, -180), Vector2(466, 261.5)]
 }
 
-[sub_resource type="Animation" id="Animation_ymwsg"]
-length = 0.001
-tracks/0/type = "value"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath("WaitingLayer/WaitingPanel:position")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"times": PackedFloat32Array(0),
-"transitions": PackedFloat32Array(1),
-"update": 0,
-"values": [Vector2(466, 261.5)]
-}
-
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_jbjna"]
 _data = {
 "RESET": SubResource("Animation_ymwsg"),
@@ -42,9 +42,6 @@ _data = {
 
 [node name="SceneTransitioner" type="Node"]
 script = ExtResource("1_7opo2")
-
-[node name="JobObserversContainer" type="Node" parent="."]
-unique_name_in_owner = true
 
 [node name="WaitingLayer" type="CanvasLayer" parent="."]
 unique_name_in_owner = true

@@ -17,7 +17,7 @@ public partial class MainGameHost : MainGameClient
         MaxClients = maxClients;
     }
 
-    public async override Task<InitLevelResult> Initialize()
+    public async override Task<PreInitResult> PreInitialize()
     {
         var args = new string[]
         {
@@ -34,7 +34,7 @@ public partial class MainGameHost : MainGameClient
 
         // Check if process started
         if (pid == -1)
-            return new InitLevelResult(false, "Failed to start server");
+            return new PreInitResult(false, "Failed to start server");
 #else
         // Get executable file extension
         var fileExt = OS.GetName() switch
@@ -51,9 +51,9 @@ public partial class MainGameHost : MainGameClient
 
         // Check if process started
         if (pid == -1)
-            return new InitLevelResult(false, "Failed to start server");
+            return new PreInitResult(false, "Failed to start server");
 #endif
-        // Initialize client
-        return await base.Initialize();
+        // PreInitialize client
+        return await base.PreInitialize();
     }
 }

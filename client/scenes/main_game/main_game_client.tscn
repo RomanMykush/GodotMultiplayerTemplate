@@ -6,4 +6,5 @@
 [node name="MainGameClient" type="Node"]
 script = ExtResource("1_m143c")
 
-[node name="Synchronizer" parent="." instance=ExtResource("2_2y4eb")]
+[node name="TickSync" parent="." instance=ExtResource("2_2y4eb")]
+unique_name_in_owner = true
