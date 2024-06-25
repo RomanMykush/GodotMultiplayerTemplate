@@ -8,7 +8,7 @@ namespace SteampunkDnD.Server;
 public partial class Network : Node
 {
     public static Network Singleton { get; private set; }
-    [Signal] public delegate void MessageReceivedEventHandler(int peer, GodotWrapper<INetworkMessage> message);
+    [Signal] public delegate void MessageReceivedEventHandler(int peer, GodotWrapper<INetworkMessage> wrapper);
 
     public override void _Ready()
     {

@@ -9,7 +9,7 @@ namespace SteampunkDnD.Client;
 public partial class Network : Node
 {
     public static Network Singleton { get; private set; }
-    [Signal] public delegate void MessageReceivedEventHandler(GodotWrapper<INetworkMessage> message);
+    [Signal] public delegate void MessageReceivedEventHandler(GodotWrapper<INetworkMessage> wrapper);
 
     public override void _Ready()
     {

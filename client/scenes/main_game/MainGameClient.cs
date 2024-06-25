@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace SteampunkDnD.Client;
 
-public partial class MainGameClient : Node, ILevel
+public partial class MainGameClient : Node, IGameMode
 {
     private Synchronizer TickSync;
 

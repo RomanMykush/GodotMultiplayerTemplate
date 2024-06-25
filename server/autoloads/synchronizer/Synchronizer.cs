@@ -15,9 +15,9 @@ public partial class Synchronizer : Node
     {
         Singleton = this;
         // Subscribe to events
-        Network.Singleton.MessageReceived += (peer, msg) =>
+        Network.Singleton.MessageReceived += (peer, wrapper) =>
         {
-            switch (msg.Value) {
+            switch (wrapper.Value) {
             case Sync sync:
                 OnSyncReceived(peer, sync);
                 break;

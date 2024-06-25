@@ -6,7 +6,7 @@ namespace SteampunkDnD.Shared;
 
 public record PreInitResult(bool IsSuccessful, string Message);
 
-public interface ILevel : IInitializable
+public interface IGameMode : IInitializable
 {
     public Task<PreInitResult> PreInitialize();
     public void CleanUp();

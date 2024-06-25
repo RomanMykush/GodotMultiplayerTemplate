@@ -29,7 +29,7 @@ public partial class AppManager : Node
 
         EmitSignal(SignalName.Exiting);
 
-        if (GetTree().CurrentScene is ILevel level)
+        if (GetTree().CurrentScene is IGameMode level)
             level.CleanUp();
 
         GetTree().Quit();

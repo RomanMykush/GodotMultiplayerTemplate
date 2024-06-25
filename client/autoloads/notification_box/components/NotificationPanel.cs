@@ -3,7 +3,7 @@ using System;
 
 namespace SteampunkDnD.Client;
 
-public partial class MessagePanel : Control
+public partial class NotificationPanel : Control
 {
     [Signal] public delegate void ConfirmedEventHandler();
     private Label TitleLabel;

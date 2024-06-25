@@ -45,7 +45,7 @@ public partial class SceneTransitioner : Node
     {
         Logger.Singleton.Log(LogLevel.Trace, $"Scene transition to {node.GetType().Name} started");
 
-        var nextLevel = node as ILevel;
+        var nextLevel = node as IGameMode;
         if (nextLevel != null)
         {
             // Show waiting panel
@@ -57,7 +57,7 @@ public partial class SceneTransitioner : Node
             if (!result.IsSuccessful)
             {
                 WaitingLayer.Hide();
-                _ = MessageBox.Singleton.Show(result.Message);
+                _ = NotificationBox.Singleton.Show(result.Message);
                 return;
             }
         }
@@ -69,7 +69,7 @@ public partial class SceneTransitioner : Node
         WaitingLayer.Hide();
 
         // Clean up previous level
-        if (GetTree().CurrentScene is ILevel currentLevel)
+        if (GetTree().CurrentScene is IGameMode currentLevel)
             currentLevel.CleanUp();
 
         // Set new scene
@@ -94,8 +94,8 @@ public partial class SceneTransitioner : Node
                 }
                 catch (Exception)
                 {
-                    // TODO: Add more meaningful message
-                    await MessageBox.Singleton.Show("Something went wrong").ContinueWith((task) =>
+                    // TODO: Add more meaningful text for notification
+                    await NotificationBox.Singleton.Show("Something went wrong").ContinueWith((task) =>
                     {
                         var node = SceneFactory.Singleton.CreateMainMenu();
                         TransitionTask = ChangeScene(node);

@@ -6,8 +6,8 @@ namespace SteampunkDnD.Shared;
 
 public partial class AppStartUp : Node
 {
-    [Export] private string ClientStartUpPath { get; set; }
-    [Export] private string ServerStartUpPath { get; set; }
+    [Export(PropertyHint.File, "*.tscn")] private string ClientStartUpPath { get; set; }
+    [Export(PropertyHint.File, "*.tscn")] private string ServerStartUpPath { get; set; }
     public override void _Ready()
     {
 #if TOOLS           // Editor build
