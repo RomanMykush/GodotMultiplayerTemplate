@@ -80,7 +80,14 @@ public partial class Network : Node
 
     private void OnPacketReceived(long id, byte[] data)
     {
-        var message = MemoryPackSerializer.Deserialize<INetworkMessage>(data);
-        EmitSignal(SignalName.MessageReceived, new GodotWrapper<INetworkMessage>(message));
+        try
+        {
+            var message = MemoryPackSerializer.Deserialize<INetworkMessage>(data);
+            EmitSignal(SignalName.MessageReceived, new GodotWrapper<INetworkMessage>(message));
+        }
+        catch (MemoryPackSerializationException)
+        {
+            Logger.Singleton.Log(LogLevel.Error, "Invalid data has been received");
+        }
     }
 }
