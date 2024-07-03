@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://ce8m4pun8lwla"]
+
+[ext_resource type="Script" path="res://client/scenes/main_game/components/tick_clock/components/LatencyCalculator.cs" id="1_ket81"]
+
+[node name="LatencyCalculator" type="Node"]
+script = ExtResource("1_ket81")

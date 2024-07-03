@@ -1,10 +1,10 @@
 [gd_scene load_steps=3 format=3 uid="uid://di11p6slhflx2"]
 
 [ext_resource type="Script" path="res://client/scenes/main_game/MainGameClient.cs" id="1_m143c"]
-[ext_resource type="PackedScene" uid="uid://d4fs1ud6v4y5r" path="res://client/scenes/main_game/components/synchronizer.tscn" id="2_2y4eb"]
+[ext_resource type="PackedScene" uid="uid://c5w72uo0w5e5i" path="res://client/scenes/main_game/components/tick_clock/tick_clock.tscn" id="2_thdnb"]
 
 [node name="MainGameClient" type="Node"]
 script = ExtResource("1_m143c")
 
-[node name="TickSync" parent="." instance=ExtResource("2_2y4eb")]
+[node name="Clock" parent="." instance=ExtResource("2_thdnb")]
 unique_name_in_owner = true

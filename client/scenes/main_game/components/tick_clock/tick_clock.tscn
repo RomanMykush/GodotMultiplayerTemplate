@@ -1,0 +1,21 @@
+[gd_scene load_steps=5 format=3 uid="uid://c5w72uo0w5e5i"]
+
+[ext_resource type="Script" path="res://client/scenes/main_game/components/tick_clock/TickClock.cs" id="1_0y0cc"]
+[ext_resource type="PackedScene" uid="uid://dpe4sh0on7j6d" path="res://client/scenes/main_game/components/tick_clock/components/sync_pinger.tscn" id="2_5nac8"]
+[ext_resource type="PackedScene" uid="uid://ce8m4pun8lwla" path="res://client/scenes/main_game/components/tick_clock/components/latency_calculator.tscn" id="3_m4cqw"]
+[ext_resource type="PackedScene" uid="uid://do2av3rugc68y" path="res://client/scenes/main_game/components/tick_clock/components/tick_synchronizer.tscn" id="4_2gkb3"]
+
+[node name="TickClock" type="Node"]
+script = ExtResource("1_0y0cc")
+
+[node name="Pinger" parent="." instance=ExtResource("2_5nac8")]
+unique_name_in_owner = true
+
+[node name="Calculator" parent="." instance=ExtResource("3_m4cqw")]
+unique_name_in_owner = true
+
+[node name="Synchronizer" parent="." instance=ExtResource("4_2gkb3")]
+unique_name_in_owner = true
+
+[connection signal="LatencyCalculated" from="Calculator" to="." method="OnLatencyCalculated"]
+[connection signal="LatencyCalculated" from="Calculator" to="Synchronizer" method="OnLatencyCalculated"]
