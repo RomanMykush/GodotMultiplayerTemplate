@@ -25,9 +25,20 @@ public struct Tick
     public Tick AddDuration(float duration)
     {
         TickDuration += duration;
-        uint deltaTicks = (uint)Mathf.FloorToInt(TickDuration * TickRate);
-        CurrentTick += deltaTicks;
-        TickDuration %= TickInterval;
+        if (TickDuration >= 0)
+        {
+            uint deltaTicks = (uint)Mathf.FloorToInt(TickDuration * TickRate);
+            CurrentTick += deltaTicks;
+            TickDuration %= TickInterval;
+        }
+        else
+        {
+            uint deltaTicks = (uint)Mathf.CeilToInt(-TickDuration * TickRate);
+            CurrentTick -= deltaTicks;
+            TickDuration %= TickInterval;
+            TickDuration += TickInterval;
+        }
+        
         return this;
     }
 
