@@ -9,9 +9,9 @@ namespace SteampunkDnD.Client;
 public partial class TickClock : Node, IInitializable
 {
     // Signals
-    [Signal] public delegate void InterpolationTickUpdatedEventHandler(int currentTick, float tickDuration);
-    [Signal] public delegate void ExtrapolationTickUpdatedEventHandler(int currentTick, float tickDuration);
-    [Signal] public delegate void PredictionTickUpdatedEventHandler(int currentTick, float tickDuration);
+    [Signal] public delegate void InterpolationTickUpdatedEventHandler(GodotWrapper<Tick> wrapper);
+    [Signal] public delegate void ExtrapolationTickUpdatedEventHandler(GodotWrapper<Tick> wrapper);
+    [Signal] public delegate void PredictionTickUpdatedEventHandler(GodotWrapper<Tick> wrapper);
 
     // Child nodes
     private SyncPinger Pinger;
@@ -77,7 +77,7 @@ public partial class TickClock : Node, IInitializable
         // Calculate interpolation tick
         var interpolationTick = (serverTick with { CurrentTick = serverTick.CurrentTick - tickBuffer })
             .AddDuration(-AvarageLatency);
-        EmitSignal(SignalName.InterpolationTickUpdated, interpolationTick.CurrentTick, interpolationTick.TickDuration);
+        EmitSignal(SignalName.InterpolationTickUpdated, new GodotWrapper<Tick>(interpolationTick));
 
         ExtrapolationTick = interpolationTick;
 
@@ -97,8 +97,8 @@ public partial class TickClock : Node, IInitializable
         ExtrapolationTick = ExtrapolationTick.AddDuration(delta);
         PredictionTick = PredictionTick.AddDuration(delta);
 
-        EmitSignal(SignalName.ExtrapolationTickUpdated, ExtrapolationTick.CurrentTick, ExtrapolationTick.TickDuration);
-        EmitSignal(SignalName.PredictionTickUpdated, PredictionTick.CurrentTick, PredictionTick.TickDuration);
+        EmitSignal(SignalName.ExtrapolationTickUpdated, new GodotWrapper<Tick>(ExtrapolationTick));
+        EmitSignal(SignalName.PredictionTickUpdated, new GodotWrapper<Tick>(PredictionTick));
         LastProcessTimestamp = (uint)Time.GetTicksMsec();
     }
 
