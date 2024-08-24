@@ -5,10 +5,10 @@ using System.Linq;
 
 namespace SteampunkDnD.Shared;
 
-public partial class Creature : CharacterBody3D, ISpatial, IControlable
+public partial class Character : CharacterBody3D, ISpatial, IControlable
 {
     public uint EntityId { get; set; }
-    public string Specie { get; set; } // TODO: Add updates to model, skeleton rig and animations when this property changes
+    public string Specie { get; set; }
     private IEnumerable<ICommand> LastInputs;
 
     public void ReceiveCommands(IEnumerable<ICommand> commands) => LastInputs = commands;
