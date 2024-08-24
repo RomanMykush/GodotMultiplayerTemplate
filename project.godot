@@ -24,3 +24,11 @@ AppManager="*res://shared/autoloads/app_manager/app_manager.tscn"
 [dotnet]
 
 project/assembly_name="Steampunk DnD"
+
+[file_customization]
+
+folder_colors={
+"res://client/": "teal",
+"res://server/": "blue",
+"res://shared/": "orange"
+}
