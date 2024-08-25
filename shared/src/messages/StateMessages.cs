@@ -10,11 +10,11 @@ public partial record StateSnapshot(uint Tick, IEnumerable<EntityState> States) 
 
 [MemoryPackable]
 [MemoryPackUnion(0, typeof(SpatialState))]
-[MemoryPackUnion(1, typeof(CreatureState))]
+[MemoryPackUnion(1, typeof(CharacterState))]
 public abstract partial record EntityState(uint EntityId);
 
 [MemoryPackable]
-public partial record SpatialState(uint EntityId, Vector3 Position, Quaternion Rotation) : EntityState(EntityId);
+public partial record SpatialState(uint EntityId, Vector3 Position, Vector3 Rotation) : EntityState(EntityId);
 
 [MemoryPackable]
-public partial record CreatureState(uint EntityId, Vector3 Position, Quaternion Rotation, string Specie) : SpatialState(EntityId, Position, Rotation);
+public partial record CharacterState(uint EntityId, string Specie, Vector3 Position, Vector3 Rotation, Vector3 Velocity) : SpatialState(EntityId, Position, Rotation);

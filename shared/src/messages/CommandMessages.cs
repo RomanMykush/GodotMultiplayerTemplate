@@ -25,7 +25,7 @@ public abstract record ContiniousCommand(bool JustStarted) : ICommand;
 public partial record LookAtCommand(Vector3 Target) : ICommand;
 
 [MemoryPackable]
-public partial record MoveCommand(Vector3 Direction, bool JustStarted) : ContiniousCommand(JustStarted);
+public partial record MoveCommand(Vector2 Direction, bool JustStarted) : ContiniousCommand(JustStarted);
 
 [MemoryPackable]
 public partial record JumpCommand : ICommand;
