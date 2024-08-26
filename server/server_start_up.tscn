@@ -3,9 +3,9 @@
 [ext_resource type="Script" path="res://server/ServerStartUp.cs" id="1_xe13r"]
 [ext_resource type="PackedScene" uid="uid://btuwwppjqosb8" path="res://server/autoloads/network/network.tscn" id="2_ubffh"]
 [ext_resource type="PackedScene" uid="uid://ca28lx0j3lseq" path="res://server/autoloads/host_checker/host_checker.tscn" id="3_vjap7"]
-[ext_resource type="PackedScene" uid="uid://bcl2627npo3o1" path="res://server/autoloads/synchronizer/synchronizer.tscn" id="4_h6038"]
+[ext_resource type="PackedScene" uid="uid://8int2k1bnhv3" path="res://server/autoloads/auth_service/auth_service.tscn" id="4_550e4"]
 
 [node name="ServerStartUp" type="Node"]
 script = ExtResource("1_xe13r")
 PhysicsTicksRate = 10
-Singletons = Array[PackedScene]([ExtResource("2_ubffh"), ExtResource("3_vjap7"), ExtResource("4_h6038")])
+Singletons = Array[PackedScene]([ExtResource("2_ubffh"), ExtResource("3_vjap7"), ExtResource("4_550e4")])
