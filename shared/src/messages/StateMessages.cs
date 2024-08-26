@@ -5,6 +5,9 @@ using System.Collections.Generic;
 
 namespace SteampunkDnD.Shared;
 
+[MemoryPackUnion(0, typeof(StateSnapshot))]
+public partial interface INetworkMessage { }
+
 [MemoryPackable]
 public partial record StateSnapshot(uint Tick, IEnumerable<EntityState> States) : INetworkMessage;
 

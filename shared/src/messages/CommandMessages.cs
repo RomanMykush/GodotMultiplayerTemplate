@@ -5,6 +5,9 @@ using System.Collections.Generic;
 
 namespace SteampunkDnD.Shared;
 
+[MemoryPackUnion(1, typeof(RecentCommandSnapshots))]
+public partial interface INetworkMessage { }
+
 [MemoryPackable]
 public partial record RecentCommandSnapshots(IEnumerable<CommandSnapshot> InputSnapshots) : INetworkMessage;
 
