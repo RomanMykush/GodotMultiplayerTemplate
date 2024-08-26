@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using System.Diagnostics;
 
 namespace SteampunkDnD.Shared;
 
@@ -10,6 +11,7 @@ public partial class Logger : Node
     public override void _Ready() =>
         Singleton = this;
 
+    [StackTraceHidden]
     public void Log(LogLevel level, string message)
     {
         // Get prefix and color
