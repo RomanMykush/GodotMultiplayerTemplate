@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://do2av3rugc68y"]
 
-[ext_resource type="Script" path="res://client/scenes/main_game/components/tick_clock/components/TickSynchronizer.cs" id="1_k4h4v"]
+[ext_resource type="Script" path="res://client/autoloads/tick_clock/components/TickSynchronizer.cs" id="1_k4h4v"]
 
 [sub_resource type="Curve" id="Curve_uk0ag"]
 _data = [Vector2(0, 0), 0.0, 0.0, 0, 0, Vector2(1, 1), 1.4, 0.0, 0, 0]

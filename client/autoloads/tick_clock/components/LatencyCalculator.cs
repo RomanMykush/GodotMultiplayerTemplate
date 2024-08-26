@@ -17,6 +17,7 @@ public partial class LatencyCalculator : Node, IInitializable
 
     public IEnumerable<JobInfo> ConstructInitJobs()
     {
+        LatencySamples.Clear();
         // Start populating LatencySamples with data
         var jobs = new Dictionary<Job, float>();
         for (int i = 0; i < MinSampleSize; i++)
@@ -61,7 +62,7 @@ public partial class LatencyCalculator : Node, IInitializable
         return new List<JobInfo>() { new(combinedJobs) };
     }
 
-    public void OnSyncReceived(Sync sync)
+    private void OnSyncReceived(Sync sync)
     {
         AppendLatency(sync);
 

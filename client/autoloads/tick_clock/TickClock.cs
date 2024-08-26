@@ -8,13 +8,14 @@ namespace SteampunkDnD.Client;
 
 public partial class TickClock : Node, IInitializable
 {
+    public static TickClock Singleton { get; private set; }
+
     // Signals
     [Signal] public delegate void InterpolationTickUpdatedEventHandler(GodotWrapper<Tick> wrapper);
     [Signal] public delegate void ExtrapolationTickUpdatedEventHandler(GodotWrapper<Tick> wrapper);
     [Signal] public delegate void PredictionTickUpdatedEventHandler(GodotWrapper<Tick> wrapper);
 
     // Child nodes
-    private SyncPinger Pinger;
     private LatencyCalculator Calculator;
     private TickSynchronizer Synchronizer;
 
@@ -27,11 +28,13 @@ public partial class TickClock : Node, IInitializable
 
     public override void _Ready()
     {
-        Pinger = GetNode<SyncPinger>("%Pinger");
+        Singleton = this;
+
         Calculator = GetNode<LatencyCalculator>("%Calculator");
         Synchronizer = GetNode<TickSynchronizer>("%Synchronizer");
 
-        ProcessMode = ProcessModeEnum.Disabled;
+        Disable();
+        Multiplayer.ServerDisconnected += () => Disable();
     }
 
     public IEnumerable<JobInfo> ConstructInitJobs()
@@ -55,11 +58,7 @@ public partial class TickClock : Node, IInitializable
         var combinedJobs = new ConcurrentJob(weightedJobs);
 
         // Start pinging the server after initialization is complete
-        combinedJobs.Completed += () =>
-        {
-            Pinger.Start();
-            ProcessMode = ProcessModeEnum.Always;
-        };
+        combinedJobs.Completed += () => ProcessMode = ProcessModeEnum.Always;
 
         return new List<JobInfo>() { new(combinedJobs) };
     }
@@ -102,9 +101,11 @@ public partial class TickClock : Node, IInitializable
         LastProcessTimestamp = (uint)Time.GetTicksMsec();
     }
 
-    public void OnLatencyCalculated(float avarage, float std)
+    private void OnLatencyCalculated(float avarage, float std)
     {
         AvarageLatency = avarage;
         LatencyStd = std;
     }
+
+    public void Disable() => ProcessMode = ProcessModeEnum.Disabled;
 }

@@ -9,8 +9,6 @@ namespace SteampunkDnD.Client;
 
 public partial class MainGameClient : Node, IGameMode
 {
-    private TickClock Clock;
-
     public string Address { get; protected set; }
     public int Port { get; protected set; }
 
@@ -18,11 +16,6 @@ public partial class MainGameClient : Node, IGameMode
     {
         Address = address;
         Port = port;
-    }
-
-    public override void _Ready()
-    {
-        Clock = GetNode<TickClock>("%Clock");
     }
 
     public virtual async Task<PreInitResult> PreInitialize()
@@ -34,7 +27,7 @@ public partial class MainGameClient : Node, IGameMode
     public IEnumerable<JobInfo> ConstructInitJobs()
     {
         // TODO: Add more items to initialize
-        var syncInitJobs = Clock.ConstructInitJobs();
+        var syncInitJobs = TickClock.Singleton.ConstructInitJobs();
 
         // Add jobs with weights to dictionary
         var weightedJobs = syncInitJobs.ToDictionary(ji => ji.Job, _ => 1f);
@@ -44,9 +37,5 @@ public partial class MainGameClient : Node, IGameMode
         return new List<JobInfo>() { new LoadingInfo(combinedJobs) };
     }
 
-    public void CleanUp()
-    {
-        // TODO: Implement clean up
-        throw new NotImplementedException();
-    }
+    public void CleanUp() => TickClock.Singleton.Disable();
 }

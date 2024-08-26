@@ -80,12 +80,12 @@ public partial class TickSynchronizer : Node, IInitializable
         return CurrentServerTick;
     }
 
-    public void OnSyncInfoReceived(SyncInfo syncInfo) =>
+    private void OnSyncInfoReceived(SyncInfo syncInfo) =>
         CurrentServerTick = new Tick((uint)syncInfo.ServerTicksPerSecond) { CurrentTick = CurrentServerTick.CurrentTick };
 
-    public void OnLatencyCalculated(float avarage, float _) => AvarageLatency = avarage;
+    private void OnLatencyCalculated(float avarage, float _) => AvarageLatency = avarage;
 
-    public void OnSyncReceived(Sync sync)
+    private void OnSyncReceived(Sync sync)
     {
         var preferredTick = new Tick(CurrentServerTick.TickRate) { CurrentTick = sync.ServerTick }
             .AddDuration(AvarageLatency);
