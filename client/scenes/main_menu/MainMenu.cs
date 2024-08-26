@@ -79,5 +79,5 @@ public partial class MainMenu : Control
         ContentAnimPlayer.Play("show_content");
     }
 
-    public void OnExit() => AppManager.Singleton.Exit();
+    private void OnExit() => AppManager.Singleton.Exit();
 }

@@ -8,7 +8,7 @@
 
 [node name="SceneFactory" type="Node"]
 script = ExtResource("1_8mxt8")
-_intro = ExtResource("2_q87c0")
-_mainMenu = ExtResource("3_mraxw")
-_mainGameHost = ExtResource("4_w45ny")
-_mainGameClient = ExtResource("5_4o7m0")
+IntroScene = ExtResource("2_q87c0")
+MainMenuScene = ExtResource("3_mraxw")
+MainGameHostScene = ExtResource("4_w45ny")
+MainGameClientScene = ExtResource("5_4o7m0")
