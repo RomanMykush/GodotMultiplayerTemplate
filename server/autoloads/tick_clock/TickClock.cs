@@ -7,7 +7,7 @@ namespace SteampunkDnD.Server;
 public partial class TickClock : Node
 {
     public static TickClock Singleton { get; private set; }
-    [Signal] public delegate void TickUpdatedEventHandler(uint currentTick);
+    [Signal] public delegate void TickUpdatedEventHandler(uint currentTick, float tickTimeDelta);
     public uint CurrentTick { get; private set; }
 
     public override void _Ready()
