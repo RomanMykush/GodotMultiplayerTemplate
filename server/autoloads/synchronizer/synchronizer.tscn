@@ -1,6 +1,0 @@
-[gd_scene load_steps=2 format=3 uid="uid://bcl2627npo3o1"]
-
-[ext_resource type="Script" path="res://server/autoloads/synchronizer/Synchronizer.cs" id="1_ffmfe"]
-
-[node name="Synchronizer" type="Node"]
-script = ExtResource("1_ffmfe")

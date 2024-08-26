@@ -4,11 +4,10 @@ using System;
 
 namespace SteampunkDnD.Server;
 
-public partial class Synchronizer : Node
+public partial class TickClock : Node
 {
-    [Signal] public delegate void TickUpdatedEventHandler(int currentTick);
-
-    public static Synchronizer Singleton { get; private set; }
+    public static TickClock Singleton { get; private set; }
+    [Signal] public delegate void TickUpdatedEventHandler(uint currentTick);
     public uint CurrentTick { get; private set; }
 
     public override void _Ready()
@@ -31,7 +30,7 @@ public partial class Synchronizer : Node
     public override void _PhysicsProcess(double delta)
     {
         CurrentTick++;
-        EmitSignal(SignalName.TickUpdated, CurrentTick);
+        EmitSignal(SignalName.TickUpdated, CurrentTick, (float)delta);
     }
 
     private void OnSyncReceived(int peer, Sync sync)
