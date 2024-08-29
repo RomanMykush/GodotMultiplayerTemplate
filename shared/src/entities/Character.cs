@@ -7,8 +7,9 @@ namespace SteampunkDnD.Shared;
 
 public partial class Character : CharacterBody3D, ISpatial, IControlable
 {
-    public uint EntityId { get; set; }
-    public string Kind { get; set; }
+    [Export] public string Kind { get; private set; }
+
+    public uint EntityId { get; private set; }
     private IEnumerable<ICommand> LastInputs;
 
     public void ReceiveCommands(IEnumerable<ICommand> commands) => LastInputs = commands;
@@ -20,5 +21,25 @@ public partial class Character : CharacterBody3D, ISpatial, IControlable
         // Get all continuous inputs and mark them as not started recenty
         LastInputs = LastInputs.OfType<ContiniousCommand>()
             .Select(i => i with { JustStarted = false });
+    }
+
+    public EntityState GetState() => new CharacterState(EntityId, Kind, Position, Rotation, Velocity);
+
+    public void ApplyState(EntityState state)
+    {
+        if (state is not CharacterState characterState)
+            throw new ArgumentException("Invalid argument type was passed");
+
+        if (EntityId == 0)
+            EntityId = characterState.EntityId;
+        else if (EntityId != characterState.EntityId)
+            throw new ArgumentException("State with wrong Id was passed");
+
+        if (Kind != characterState.Kind)
+            Logger.Singleton.Log(LogLevel.Error, "State with wrong Kind was passed");
+
+        Position = characterState.Position;
+        Rotation = characterState.Rotation;
+        Velocity = characterState.Velocity;
     }
 }
