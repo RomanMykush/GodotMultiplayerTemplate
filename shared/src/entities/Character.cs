@@ -8,7 +8,7 @@ namespace SteampunkDnD.Shared;
 public partial class Character : CharacterBody3D, ISpatial, IControlable
 {
     public uint EntityId { get; set; }
-    public string Specie { get; set; }
+    public string Kind { get; set; }
     private IEnumerable<ICommand> LastInputs;
 
     public void ReceiveCommands(IEnumerable<ICommand> commands) => LastInputs = commands;

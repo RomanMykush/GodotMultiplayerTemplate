@@ -20,4 +20,4 @@ public abstract partial record EntityState(uint EntityId);
 public partial record SpatialState(uint EntityId, Vector3 Position, Vector3 Rotation) : EntityState(EntityId);
 
 [MemoryPackable]
-public partial record CharacterState(uint EntityId, string Specie, Vector3 Position, Vector3 Rotation, Vector3 Velocity) : SpatialState(EntityId, Position, Rotation);
+public partial record CharacterState(uint EntityId, string Kind, Vector3 Position, Vector3 Rotation, Vector3 Velocity) : SpatialState(EntityId, Position, Rotation);
