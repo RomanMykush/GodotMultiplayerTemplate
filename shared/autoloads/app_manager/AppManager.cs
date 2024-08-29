@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using System.Threading;
 
 namespace SteampunkDnD.Shared;
 
@@ -13,6 +14,8 @@ public partial class AppManager : Node
     // Exports
     [Export] public int DefaultPort { get; private set; }
     [Export] public int DefaultMaxPlayers { get; private set; }
+
+    public static readonly SynchronizationContext MainThreadSyncContext = SynchronizationContext.Current;
 
     public override void _Ready() =>
         Singleton = this;

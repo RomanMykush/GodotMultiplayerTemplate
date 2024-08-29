@@ -2,6 +2,7 @@ using Godot;
 using SteampunkDnD.Shared;
 using System;
 using System.Collections.Generic;
+using System.Threading;
 
 namespace SteampunkDnD.Client;
 
@@ -42,9 +43,13 @@ public partial class TickSynchronizer : Node, IInitializable
                 Network.Singleton.SendPacket(syncInfoRequest, MultiplayerPeer.TransferModeEnum.Reliable);
             });
             // Wait for SyncInfo message to arrive
+            SignalAwaiter awaiter = null;
             while (syncInfo == null)
             {
-                var awaiter = await DeferredUtils.RunDeferred(() => ToSignal(Network.Singleton, Network.SignalName.MessageReceived));
+                if (SynchronizationContext.Current == AppManager.MainThreadSyncContext)
+                    awaiter = ToSignal(Network.Singleton, Network.SignalName.MessageReceived);
+                else awaiter = await DeferredUtils.RunDeferred(() => ToSignal(Network.Singleton, Network.SignalName.MessageReceived));
+
                 var args = await awaiter;
                 var wrapper = (GodotWrapper<INetworkMessage>)args[0];
                 syncInfo = wrapper.Value as SyncInfo;

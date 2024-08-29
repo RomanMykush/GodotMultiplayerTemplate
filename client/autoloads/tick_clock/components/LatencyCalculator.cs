@@ -3,6 +3,7 @@ using SteampunkDnD.Shared;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 
 namespace SteampunkDnD.Client;
 
@@ -32,9 +33,13 @@ public partial class LatencyCalculator : Node, IInitializable
                 });
                 // Wait for Sync message to arrive
                 Sync sync = null;
+                SignalAwaiter awaiter = null;
                 while (sync == null)
                 {
-                    var awaiter = await DeferredUtils.RunDeferred(() => ToSignal(Network.Singleton, Network.SignalName.MessageReceived));
+                    if (SynchronizationContext.Current == AppManager.MainThreadSyncContext)
+                        awaiter = ToSignal(Network.Singleton, Network.SignalName.MessageReceived);
+                    else awaiter = await DeferredUtils.RunDeferred(() => ToSignal(Network.Singleton, Network.SignalName.MessageReceived));
+
                     var args = await awaiter;
                     var wrapper = (GodotWrapper<INetworkMessage>)args[0];
                     sync = wrapper.Value as Sync;
