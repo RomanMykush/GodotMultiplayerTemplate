@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://d27x30s2onjeu"]
+
+[ext_resource type="Script" path="res://shared/scenes/entity_container/EntityContainer.cs" id="1_j42p0"]
+
+[node name="EntityContainer" type="Node"]
+script = ExtResource("1_j42p0")
