@@ -11,7 +11,7 @@ public partial class SyncPinger : Timer
         Timeout += () =>
         {
             var sync = new Sync((uint)Time.GetTicksMsec(), 0);
-            Network.Singleton.SendPacket(sync);
+            Network.Singleton.SendMessage(sync);
         };
     }
 }

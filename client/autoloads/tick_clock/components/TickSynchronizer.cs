@@ -40,7 +40,7 @@ public partial class TickSynchronizer : Node, IInitializable
             DeferredUtils.CallDeferred(() =>
             {
                 var syncInfoRequest = new SyncInfoRequest();
-                Network.Singleton.SendPacket(syncInfoRequest, MultiplayerPeer.TransferModeEnum.Reliable);
+                Network.Singleton.SendMessage(syncInfoRequest, MultiplayerPeer.TransferModeEnum.Reliable);
             });
             // Wait for SyncInfo message to arrive
             SignalAwaiter awaiter = null;

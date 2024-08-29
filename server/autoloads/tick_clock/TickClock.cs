@@ -36,13 +36,13 @@ public partial class TickClock : Node
     private void OnSyncReceived(int peer, Sync sync)
     {
         var reply = sync with { ServerTick = CurrentTick };
-        Network.Singleton.SendPacket(peer, reply);
+        Network.Singleton.SendMessage(peer, reply);
     }
 
     private void OnSyncInfoRequestReceived(int peer)
     {
         var tickRate = Engine.PhysicsTicksPerSecond;
         var syncInfo = new SyncInfo(tickRate);
-        Network.Singleton.SendPacket(peer, syncInfo);
+        Network.Singleton.SendMessage(peer, syncInfo);
     }
 }

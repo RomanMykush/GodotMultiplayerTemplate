@@ -1,24 +1,22 @@
 using Godot;
-using MemoryPack;
 using SteampunkDnD.Shared;
 using System;
 using System.Threading.Tasks;
 
 namespace SteampunkDnD.Client;
 
-public partial class Network : Node
+public partial class Network : NetworkBase
 {
     public static Network Singleton { get; private set; }
     [Signal] public delegate void MessageReceivedEventHandler(GodotWrapper<INetworkMessage> wrapper);
+    public const int ServerPeer = 1;
 
     public override void _Ready()
     {
         Singleton = this;
-        // Subsribe to events
+
         Multiplayer.ConnectionFailed += Disconnect;
-        if (Multiplayer is SceneMultiplayer sceneMultiplayer)
-            sceneMultiplayer.PeerPacket += OnPacketReceived;
-        else Logger.Singleton.Log(LogLevel.Error, "Property Multiplayer does not contain an instance of SceneMultiplayer");
+        base._Ready();
     }
 
     /// <returns>true if trying to establish connect or already connected to server; otherwise false.</returns>
@@ -37,12 +35,12 @@ public partial class Network : Node
         bool connectionStarted = await DeferredUtils.RunDeferred(() =>
         {
             ENetMultiplayerPeer peer = new();
-            var clientStatus = peer.CreateClient(address, port);
+            var status = peer.CreateClient(address, port);
             // Success if correct address format was supplied
-            if (clientStatus == Error.Ok)
+            if (status == Error.Ok)
                 Multiplayer.MultiplayerPeer = peer;
             // Return result
-            return clientStatus == Error.Ok;
+            return status == Error.Ok;
         });
 
         if (!connectionStarted)
@@ -67,27 +65,20 @@ public partial class Network : Node
         return false;
     }
 
+    public void SendMessage(INetworkMessage message, MultiplayerPeer.TransferModeEnum mode = MultiplayerPeer.TransferModeEnum.Unreliable) =>
+        SendMessage(ServerPeer, message, mode);
+
     public void Disconnect() =>
         Multiplayer.MultiplayerPeer = null;
 
-    public void SendPacket(INetworkMessage message, MultiplayerPeer.TransferModeEnum mode = MultiplayerPeer.TransferModeEnum.Unreliable)
+    protected override void OnMessageReceived(int peer, INetworkMessage message)
     {
-        byte[] data = MemoryPackSerializer.Serialize(message);
-        var transmitter = Multiplayer as SceneMultiplayer;
-        // TODO: Add channels mapping to INetworkMessage implementation type for faster Reliable and UnreliableOrdered transfer modes
-        transmitter.SendBytes(data, 1, mode, 0);
-    }
-
-    private void OnPacketReceived(long id, byte[] data)
-    {
-        try
+        if (peer != ServerPeer)
         {
-            var message = MemoryPackSerializer.Deserialize<INetworkMessage>(data);
-            EmitSignal(SignalName.MessageReceived, new GodotWrapper<INetworkMessage>(message));
+            Logger.Singleton.Log(LogLevel.Warning, $"Received message directly from non-server peer {peer}. Ignoring it");
+            return;
         }
-        catch (MemoryPackSerializationException)
-        {
-            Logger.Singleton.Log(LogLevel.Error, "Invalid data has been received");
-        }
+        var wrapper = new GodotWrapper<INetworkMessage>(message);
+        EmitSignal(SignalName.MessageReceived, wrapper);
     }
 }

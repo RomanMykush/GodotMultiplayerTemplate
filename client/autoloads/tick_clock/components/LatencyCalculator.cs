@@ -29,7 +29,7 @@ public partial class LatencyCalculator : Node, IInitializable
                 DeferredUtils.CallDeferred(() =>
                 {
                     var sync = new Sync((uint)Time.GetTicksMsec(), 0);
-                    Network.Singleton.SendPacket(sync, MultiplayerPeer.TransferModeEnum.Reliable);
+                    Network.Singleton.SendMessage(sync, MultiplayerPeer.TransferModeEnum.Reliable);
                 });
                 // Wait for Sync message to arrive
                 Sync sync = null;
