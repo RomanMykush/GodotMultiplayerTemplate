@@ -56,6 +56,7 @@ public partial class LatencyCalculator : Node, IInitializable
 
         combinedJobs.Completed += () =>
         {
+            CalculateLatency();
             // Subscribe to sync messages
             Network.Singleton.MessageReceived += (msg) =>
             {
@@ -70,13 +71,7 @@ public partial class LatencyCalculator : Node, IInitializable
     private void OnSyncReceived(Sync sync)
     {
         AppendLatency(sync);
-
-        // Calculate numerical characteristics of distribution
-        float mathExpectation = LatencySamples.Sum(x => x) / LatencySamples.Count;
-        float dispersion = LatencySamples.Sum(x => { float res = x - mathExpectation; return res * res; }) / (LatencySamples.Count - 1);
-        float std = Mathf.Sqrt(dispersion);
-
-        EmitSignal(SignalName.LatencyCalculated, mathExpectation, std);
+        CalculateLatency();
     }
 
     private void AppendLatency(Sync sync)
@@ -88,5 +83,15 @@ public partial class LatencyCalculator : Node, IInitializable
         LatencySamples.Enqueue(avarageLatency / 1000);
         if (LatencySamples.Count > SampleSize)
             LatencySamples.Dequeue();
+    }
+
+    private void CalculateLatency()
+    {
+        // Calculate numerical characteristics of distribution
+        float avarage = LatencySamples.Sum(x => x) / LatencySamples.Count;
+        float dispersion = LatencySamples.Sum(x => { float res = x - avarage; return res * res; }) / (LatencySamples.Count - 1);
+        float std = Mathf.Sqrt(dispersion);
+
+        EmitSignal(SignalName.LatencyCalculated, avarage, std);
     }
 }

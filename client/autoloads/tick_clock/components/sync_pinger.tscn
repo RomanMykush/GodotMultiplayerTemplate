@@ -3,5 +3,6 @@
 [ext_resource type="Script" path="res://client/autoloads/tick_clock/components/SyncPinger.cs" id="1_2d3lp"]
 
 [node name="SyncPinger" type="Timer"]
+wait_time = 0.2
 autostart = true
 script = ExtResource("1_2d3lp")

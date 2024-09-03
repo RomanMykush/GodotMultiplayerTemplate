@@ -70,19 +70,17 @@ public partial class TickClock : Node, IInitializable
         // Set jitter as 99.7% of distribution (or 3 standart deviations)
         float jitter = 3 * LatencyStd;
 
-        // Calculate optional buffer
-        uint tickBuffer = (uint)Mathf.Ceil(jitter * serverTick.TickRate);
+        // Calculate offset buffer
+        float buffer = jitter + AvarageLatency + serverTick.TickInterval;
 
         // Calculate interpolation tick
-        var interpolationTick = (serverTick with { CurrentTick = serverTick.CurrentTick - tickBuffer })
-            .AddDuration(-AvarageLatency);
+        var interpolationTick = serverTick.AddDuration(-buffer);
         EmitSignal(SignalName.InterpolationTickUpdated, new GodotWrapper<Tick>(interpolationTick));
 
         ExtrapolationTick = interpolationTick;
 
         // Calculate prediction tick
-        PredictionTick = (serverTick with { CurrentTick = serverTick.CurrentTick + tickBuffer })
-            .AddDuration(AvarageLatency);
+        PredictionTick = serverTick.AddDuration(buffer);
 
         LastProcessTimestamp = (uint)Time.GetTicksMsec();
     }
