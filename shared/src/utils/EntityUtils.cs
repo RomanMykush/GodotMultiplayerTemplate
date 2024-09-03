@@ -36,4 +36,42 @@ public static class EntityUtils
                 throw new NotImplementedException($"Entity creation from {state.GetType().Name} wasn't implemented");
         }
     }
+
+    public static EntityState Interpolate(this EntityState past, EntityState future, float theta)
+    {
+        if (past.EntityId != future.EntityId)
+            throw new ArgumentException("Passed future state has different EntityId value");
+
+        switch (past)
+        {
+            case StaticState pastStaticState:
+                if (future is not StaticState futureStaticState)
+                    throw new ArgumentException("Passed future state has different type");
+
+                if (pastStaticState.Kind != futureStaticState.Kind)
+                    Logger.Singleton.Log(LogLevel.Error, "Passed future state has different Kind value");
+
+                return pastStaticState with
+                {
+                    Position = pastStaticState.Position.Lerp(futureStaticState.Position, theta),
+                    Rotation = pastStaticState.Rotation.Slerp(futureStaticState.Rotation, theta)
+                };
+
+            case CharacterState pastCharacterState:
+                if (future is not CharacterState futureCharacterState)
+                    throw new ArgumentException("Passed future state has different type");
+
+                if (pastCharacterState.Kind != futureCharacterState.Kind)
+                    Logger.Singleton.Log(LogLevel.Error, "Passed future state has different Kind value");
+
+                return pastCharacterState with
+                {
+                    Position = pastCharacterState.Position.Lerp(futureCharacterState.Position, theta),
+                    Rotation = pastCharacterState.Rotation.Slerp(futureCharacterState.Rotation, theta),
+                    Velocity = pastCharacterState.Velocity.Lerp(futureCharacterState.Velocity, theta)
+                };
+            default:
+                throw new NotImplementedException($"Interpolation for {past.GetType().Name} wasn't implemented");
+        }
+    }
 }
