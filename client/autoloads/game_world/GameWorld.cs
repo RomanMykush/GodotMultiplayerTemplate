@@ -12,9 +12,9 @@ public partial class GameWorld : Node
 
     private EntityContainer Container;
 
-    private readonly SortedList<uint, IEnumerable<EntityState>> Snapshots = new();
-    private IEnumerable<EntityState> LastInterpolationSnapshot = new List<EntityState>();
-    private readonly EntityStateComparer Comparer = new();
+    private readonly SortedSet<StateSnapshot> Snapshots = new(new StateSnapshotTickComparer());
+    private StateSnapshot LastInterpolationSnapshot = new(0, new List<EntityState>());
+    private readonly EntityStateIdComparer EntityComparer = new();
 
     public override void _Ready()
     {
@@ -36,34 +36,33 @@ public partial class GameWorld : Node
 
     private void OnSnapshotReceived(StateSnapshot snapshot)
     {
-        if (Snapshots.ContainsKey(snapshot.Tick))
-        {
-            Snapshots.Remove(snapshot.Tick);
+        // Remove existing snapshot with same Tick value
+        if (Snapshots.Remove(snapshot))
             Logger.Singleton.Log(LogLevel.Warning, "Snapshot with such Tick value already exists. Overwriting an old one");
-        }
-        Snapshots.Add(snapshot.Tick, snapshot.States);
+
+        Snapshots.Add(snapshot);
     }
 
     /// <summary> Deletes old snapshots except for the most recent old snapshot. </summary>
     private void DeleteOldSnapshots(uint currentTick)
     {
-        // Check if at least 2 past states exists
+        // Check if at least 2 snapshots exist
         if (Snapshots.Count < 2)
             return;
-        var first = Snapshots.First();
-        if (first.Key > currentTick)
+        var first = Snapshots.Min;
+        if (first.Tick > currentTick)
             return;
 
-        Snapshots.RemoveAt(0);
+        Snapshots.Remove(Snapshots.Min);
         do
         {
-            var second = Snapshots.First();
-            if (second.Key > currentTick)
+            var second = Snapshots.Min;
+            if (second.Tick > currentTick)
                 break;
             first = second;
-            Snapshots.RemoveAt(0);
+            Snapshots.Remove(first);
         } while (Snapshots.Count > 0);
-        Snapshots.Add(first.Key, first.Value);
+        Snapshots.Add(first);
     }
 
     private void OnInterpolationTickUpdated(GodotWrapper<Tick> wrapper)
@@ -71,40 +70,35 @@ public partial class GameWorld : Node
         var tick = wrapper.Value;
         DeleteOldSnapshots(tick.CurrentTick);
 
-        // Check if at least 2 past states exists
+        // Check if at least 2 snapshots exist
         if (Snapshots.Count < 2)
             return;
-        var first = Snapshots.First();
-        if (first.Key > tick.CurrentTick)
+        var pastSnapshot = Snapshots.Min;
+        if (pastSnapshot.Tick > tick.CurrentTick)
             return;
 
-        // Get past and future snapshots
-        uint pastTick = first.Key;
-        IEnumerable<EntityState> pastSnapshot = first.Value;
-        uint futureTick = 0;
-        IEnumerable<EntityState> futureSnapshot = null;
-        foreach (var item in Snapshots.Skip(1))
+        // Get future snapshot
+        StateSnapshot futureSnapshot = null;
+        foreach (var snapshot in Snapshots.Skip(1))
         {
-            if (item.Key > tick.CurrentTick)
+            if (snapshot.Tick > tick.CurrentTick)
             {
-                futureTick = item.Key;
-                futureSnapshot = item.Value;
+                futureSnapshot = snapshot;
                 break;
             }
-            pastTick = item.Key;
-            pastSnapshot = item.Value;
+            pastSnapshot = snapshot;
         }
 
         // Spawn and despawn entities if this is new snapshot object
         if (LastInterpolationSnapshot != pastSnapshot)
         {
             // Despawn old ones
-            var despawnOnes = LastInterpolationSnapshot.Except(pastSnapshot, Comparer);
+            var despawnOnes = LastInterpolationSnapshot.States.Except(pastSnapshot.States, EntityComparer);
             foreach (var item in despawnOnes)
                 Container.Delete(item.EntityId);
 
             // Spawn new ones
-            var spawnOnes = pastSnapshot.Except(LastInterpolationSnapshot, Comparer);
+            var spawnOnes = pastSnapshot.States.Except(LastInterpolationSnapshot.States, EntityComparer);
             foreach (var item in spawnOnes)
             {
                 try
@@ -119,19 +113,19 @@ public partial class GameWorld : Node
             }
         }
 
-        // Check if any future states exists
+        // Check if any future snapshots exist
         if (futureSnapshot == null)
             return;
 
         // Get interpolation theta betwean past and future snapshots
-        float tickInterval = futureTick - pastTick;
-        float presentDeltaTick = tick.CurrentTick - pastTick;
+        float tickInterval = futureSnapshot.Tick - pastSnapshot.Tick;
+        float presentDeltaTick = tick.CurrentTick - pastSnapshot.Tick;
         float theta = presentDeltaTick / tickInterval + tick.TickDuration * tick.TickRate / tickInterval;
 
         // Interpolate states
-        // TODO: Add a check for equality of past and future state types in case a malicious server sends different types, what can cause a crash
-        var presentSnapshot = pastSnapshot.Join(futureSnapshot, past => past.EntityId,
-            future => future.EntityId, (past, future) => past.Interpolate(future, theta));
+        // TODO: Add a check for equality of past and future snapshots state types in case a malicious server sends different types, what can cause a crash
+        var presentSnapshot = pastSnapshot.States.Join(futureSnapshot.States, p => p.EntityId,
+            f => f.EntityId, (p, f) => p.Interpolate(f, theta));
 
         // Apply interpolated state
         foreach (var state in presentSnapshot)

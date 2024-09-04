@@ -5,7 +5,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace SteampunkDnD.Shared;
 
-public class EntityStateComparer : IEqualityComparer<EntityState>
+public class EntityStateIdComparer : IEqualityComparer<EntityState>
 {
     public bool Equals(EntityState x, EntityState y) => x.EntityId == y.EntityId;
 
