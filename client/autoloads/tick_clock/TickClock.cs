@@ -18,6 +18,7 @@ public partial class TickClock : Node, IInitializable
     // Child nodes
     private LatencyCalculator Calculator;
     private TickSynchronizer Synchronizer;
+    private SyncPinger Pinger;
 
     // Other properties
     private float AvarageLatency;
@@ -32,6 +33,7 @@ public partial class TickClock : Node, IInitializable
 
         Calculator = GetNode<LatencyCalculator>("%Calculator");
         Synchronizer = GetNode<TickSynchronizer>("%Synchronizer");
+        Pinger = GetNode<SyncPinger>("%Pinger");
 
         Disable();
         Multiplayer.ServerDisconnected += () => Disable();
@@ -39,6 +41,9 @@ public partial class TickClock : Node, IInitializable
 
     public IEnumerable<JobInfo> ConstructInitJobs()
     {
+        // TODO: Remove when LatencyCalculator missing packets problem is solved
+        Pinger.ProcessMode = ProcessModeEnum.Always;
+
         // Construct jobs
         var syncInitJobs = Synchronizer.ConstructInitJobs();
         var calcInitJobs = Calculator.ConstructInitJobs();
@@ -105,5 +110,9 @@ public partial class TickClock : Node, IInitializable
         LatencyStd = std;
     }
 
-    public void Disable() => ProcessMode = ProcessModeEnum.Disabled;
+    public void Disable()
+    {
+        ProcessMode = ProcessModeEnum.Disabled;
+        Pinger.ProcessMode = ProcessModeEnum.Disabled;
+    }
 }

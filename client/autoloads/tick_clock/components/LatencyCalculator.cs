@@ -20,6 +20,7 @@ public partial class LatencyCalculator : Node, IInitializable
     {
         LatencySamples.Clear();
         // Start populating LatencySamples with data
+        // TODO: Fix this, sometimes signals of incoming Sync packets are missed. Temporary solution is turning on SyncPinger
         var jobs = new Dictionary<Job, float>();
         for (int i = 0; i < MinSampleSize; i++)
         {
