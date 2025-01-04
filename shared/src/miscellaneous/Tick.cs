@@ -5,41 +5,43 @@ namespace SteampunkDnD.Shared;
 
 public struct Tick
 {
-    public uint CurrentTick = 1;
+    public uint CurrentTick = 1; // TODO: Rename to TickCount
     public float TickDuration = 0; // Seconds passed through previous tick
     public uint TickRate = 0; // Ticks in one second
     public readonly float TickInterval => 1.0f / TickRate;
+    public const float Epsilon = 1e-6f;
 
     public Tick(uint tickRate)
     {
         TickRate = tickRate;
     }
 
-    public Tick SetTime(uint tick, float tickDuration)
-    {
-        CurrentTick = tick;
-        TickDuration = tickDuration;
-        return this;
-    }
-
     public Tick AddDuration(float duration)
     {
-        TickDuration += duration;
-        if (TickDuration >= 0)
+        float newTickDuration = TickDuration + duration;
+        uint newCurrentTick;
+        if (newTickDuration >= 0)
         {
-            uint deltaTicks = (uint)Mathf.FloorToInt(TickDuration * TickRate);
-            CurrentTick += deltaTicks;
-            TickDuration %= TickInterval;
+            uint deltaTicks = (uint)Mathf.FloorToInt(newTickDuration * TickRate);
+            newCurrentTick = CurrentTick + deltaTicks;
+            // Adding epsilon to avoid rounding error
+            newTickDuration += Epsilon;
+            newTickDuration %= TickInterval;
+            newTickDuration -= Epsilon;
+            newTickDuration = Math.Max(newTickDuration, 0);
         }
         else
         {
-            uint deltaTicks = (uint)Mathf.CeilToInt(-TickDuration * TickRate);
-            CurrentTick -= deltaTicks;
-            TickDuration %= TickInterval;
-            TickDuration += TickInterval;
+            uint deltaTicks = (uint)Mathf.CeilToInt(-newTickDuration * TickRate);
+            newCurrentTick = CurrentTick - deltaTicks;
+            // Adding epsilon to avoid rounding error
+            newTickDuration += Epsilon;
+            newTickDuration %= TickInterval;
+            newTickDuration -= Epsilon;
+            newTickDuration += TickInterval;
+            newTickDuration = Math.Max(newTickDuration, 0);
         }
-        
-        return this;
+        return new Tick(TickRate) { CurrentTick = newCurrentTick, TickDuration = newTickDuration };
     }
 
     public static float GetDuration(Tick start, Tick end)
@@ -54,8 +56,6 @@ public struct Tick
         return result;
     }
 
-    public override readonly string ToString()
-    {
-        return $"{CurrentTick}:{TickDuration:0.####}";
-    }
+    public override readonly string ToString() =>
+        $"{CurrentTick}:{TickDuration:0.####}";
 }
