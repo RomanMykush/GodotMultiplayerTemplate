@@ -117,7 +117,7 @@ public partial class GameWorld : Node
         if (futureSnapshot == null)
             return;
 
-        // Get interpolation theta betwean past and future snapshots
+        // Get interpolation theta between past and future snapshots
         float tickInterval = futureSnapshot.Tick - pastSnapshot.Tick;
         float presentDeltaTick = tick.CurrentTick - pastSnapshot.Tick;
         float theta = presentDeltaTick / tickInterval + tick.TickDuration * tick.TickRate / tickInterval;
@@ -137,13 +137,13 @@ public partial class GameWorld : Node
         LastInterpolationSnapshot = pastSnapshot;
     }
 
-    private void OnExtrapolationTickUpdated(GodotWrapper<Tick> wrapper)
+    private void OnExtrapolationTickUpdated(GodotWrapper<Tick> wrapper, float tickDelta)
     {
         // TODO: Implement this
         // Run if there left only one old snapshot
     }
 
-    private void OnPredictionTickUpdated(GodotWrapper<Tick> wrapper)
+    private void OnPredictionTickUpdated(GodotWrapper<Tick> wrapper, float tickDelta)
     {
         // TODO: Implement this
         // Get last known state and rewind simulation with known inputs

@@ -79,10 +79,12 @@ public partial class TickSynchronizer : Node, IInitializable
         return new List<JobInfo>() { new(syncInfoReceiveJob) };
     }
 
-    public Tick UpdateTick(float delta)
+    /// <summary> Updates <c>CurrentServerTick</c> and return it with time-scaled delta time. </summary>
+    public (Tick, float) UpdateTick(float delta)
     {
-        CurrentServerTick = CurrentServerTick.AddDuration((float)delta * CatchUpTimeScale);
-        return CurrentServerTick;
+        float finalDelta = delta * CatchUpTimeScale;
+        CurrentServerTick = CurrentServerTick.AddDuration(finalDelta);
+        return (CurrentServerTick, finalDelta);
     }
 
     private void OnSyncInfoReceived(SyncInfo syncInfo) =>
