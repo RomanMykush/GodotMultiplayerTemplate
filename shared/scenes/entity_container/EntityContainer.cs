@@ -9,6 +9,8 @@ public partial class EntityContainer : Node
     // Dictionary with keys corresponding to entity id and values to entities which derives from Node or successive type
     private readonly Dictionary<uint, IEntity> Entities = new();
 
+    public Action<IEntity> OnAddition;
+
     public IEntity Get(uint entityId) => Entities[entityId];
 
     public IEnumerable<IEntity> GetAll() => Entities.Values;
@@ -32,6 +34,7 @@ public partial class EntityContainer : Node
         // Adding
         Entities.Add(entity.EntityId, entity);
         AddChild(node);
+        OnAddition?.Invoke(entity);
     }
 
     public IEntity Splice(uint entityId)

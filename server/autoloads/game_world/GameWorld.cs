@@ -1,6 +1,5 @@
 using Godot;
 using SteampunkDnD.Shared;
-using System;
 using System.Collections.Generic;
 
 namespace SteampunkDnD.Server;
@@ -17,7 +16,15 @@ public partial class GameWorld : Node
     {
         Singleton = this;
 
+        var physicsSpace = GetViewport().World3D.Space;
         Entities = GetNode<EntityContainer>("%Entities");
+        Entities.ProcessMode = ProcessModeEnum.Disabled;
+        Entities.OnAddition = (e) =>
+        {
+            if (e is CollisionObject3D body)
+                PhysicsServer3D.BodySetSpace(body.GetRid(), physicsSpace);
+        };
+
         TickClock.Singleton.TickUpdated += OnTickUpdated;
     }
 
