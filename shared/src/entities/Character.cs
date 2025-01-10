@@ -10,9 +10,10 @@ public partial class Character : CharacterBody3D, ISpatial, IControlable
     [Export] public string Kind { get; private set; }
 
     public uint EntityId { get; private set; }
-    private IEnumerable<ICommand> LastInputs;
+    private IEnumerable<ICommand> LastInputs = new List<ICommand>();
 
-    public void ReceiveCommands(IEnumerable<ICommand> commands) => LastInputs = commands;
+    public void ReceiveCommands(IEnumerable<ICommand> commands) =>
+        LastInputs = commands;
 
     public override void _PhysicsProcess(double delta)
     {
