@@ -8,12 +8,16 @@ namespace SteampunkDnD.Client;
 // WARN: This service does NOT use secure authentication
 public partial class AuthService : Node
 {
+    public static AuthService Singleton { get; private set; }
+
+    public uint PlayerId { get; private set; }
     private const int ServerPeer = 1;
 
     public override void _Ready()
     {
-        var transmitter = Multiplayer as SceneMultiplayer;
+        Singleton = this;
 
+        var transmitter = Multiplayer as SceneMultiplayer;
         transmitter.AuthCallback = new Callable(this, MethodName.OnAuthReceived);
     }
 
@@ -35,6 +39,7 @@ public partial class AuthService : Node
                 SendMessage(newMessage);
                 break;
             case NewPlayerId newPlayerId:
+                PlayerId = newPlayerId.PlayerId;
                 // TODO: Save ServerId with corresponding PlayerId to files
                 Logger.Singleton.Log(LogLevel.Info, $"Auth completed successfully");
                 transmitter.CompleteAuth(ServerPeer);

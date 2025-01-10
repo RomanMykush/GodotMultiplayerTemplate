@@ -13,7 +13,7 @@ public partial class GameWorld : Node
     private EntityContainer Container;
 
     private readonly SortedSet<StateSnapshot> Snapshots = new(new StateSnapshotTickComparer());
-    private StateSnapshot LastInterpolationSnapshot = new(0, new List<EntityState>());
+    private StateSnapshot LastInterpolationSnapshot = new(0, new List<EntityState>(), new List<IMeta>());
     private readonly EntityStateIdComparer EntityComparer = new();
 
     public override void _Ready()
@@ -131,9 +131,36 @@ public partial class GameWorld : Node
         foreach (var state in presentSnapshot)
         {
             var entity = Container.Get(state.EntityId);
+            if (entity == PlayerController.Singleton.Pawn)
+                continue;
             entity.ApplyState(state);
         }
 
+        // Process metadata
+        if (LastInterpolationSnapshot != pastSnapshot)
+        {
+            foreach (var meta in pastSnapshot.MetaData)
+            {
+                switch (meta)
+                {
+                    case PlayerPossessionMeta playerPossession:
+                        if (playerPossession.PlayerId == AuthService.Singleton.PlayerId)
+                        {
+                            // TODO: Add check if entity exists
+                            if (!Container.Contains(playerPossession.EntityId))
+                            {
+                                Logger.Singleton.Log(LogLevel.Error, "Server sent entity id for possession of non-existing character");
+                                break;
+                            }
+                            var character = (Character)Container.Get(playerPossession.EntityId);
+                            PlayerController.Singleton.Pawn = character;
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
         LastInterpolationSnapshot = pastSnapshot;
     }
 

@@ -1,0 +1,14 @@
+[gd_scene load_steps=4 format=3 uid="uid://xkv6bjhat3q6"]
+
+[ext_resource type="Script" path="res://client/autoloads/player_controller/PlayerController.cs" id="1_awi5u"]
+[ext_resource type="PackedScene" uid="uid://dvq4wo63b8qio" path="res://client/autoloads/player_controller/components/key_input_translator.tscn" id="2_nk7he"]
+[ext_resource type="PackedScene" uid="uid://dvgxifilqpdsy" path="res://client/autoloads/player_controller/components/camera_container.tscn" id="2_oghat"]
+
+[node name="PlayerController" type="Node"]
+script = ExtResource("1_awi5u")
+
+[node name="Camera" parent="." instance=ExtResource("2_oghat")]
+unique_name_in_owner = true
+
+[node name="KeyInput" parent="." instance=ExtResource("2_nk7he")]
+unique_name_in_owner = true

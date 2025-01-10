@@ -7,6 +7,11 @@
     <RootNamespace>SteampunkDnD</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="GodotInputMapExtension" Version="0.1.4" />
     <PackageReference Include="MemoryPack" Version="1.21.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AdditionalFiles Include="project.godot" />
   </ItemGroup>
 </Project>

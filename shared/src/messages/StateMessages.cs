@@ -1,6 +1,5 @@
 using Godot;
 using MemoryPack;
-using System;
 using System.Collections.Generic;
 
 namespace SteampunkDnD.Shared;
@@ -9,7 +8,7 @@ namespace SteampunkDnD.Shared;
 public partial interface INetworkMessage { }
 
 [MemoryPackable]
-public partial record StateSnapshot(uint Tick, IEnumerable<EntityState> States) : INetworkMessage;
+public partial record StateSnapshot(uint Tick, IEnumerable<EntityState> States, IEnumerable<IMeta> MetaData) : INetworkMessage;
 
 [MemoryPackable]
 [MemoryPackUnion(0, typeof(SpatialState))]

@@ -1,0 +1,10 @@
+[gd_scene load_steps=2 format=3 uid="uid://dvgxifilqpdsy"]
+
+[ext_resource type="Script" path="res://client/autoloads/player_controller/components/CameraContainer.cs" id="1_e8lcj"]
+
+[node name="CameraContainer" type="Node3D"]
+script = ExtResource("1_e8lcj")
+
+[node name="MainCamera" type="Camera3D" parent="."]
+unique_name_in_owner = true
+current = true

@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://dvq4wo63b8qio"]
+
+[ext_resource type="Script" path="res://client/autoloads/player_controller/components/KeyInputTranslator.cs" id="1_773iy"]
+
+[node name="InputTranslator" type="Node"]
+script = ExtResource("1_773iy")

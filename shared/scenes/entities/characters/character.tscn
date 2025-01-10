@@ -6,3 +6,6 @@
 script = ExtResource("1_k5ot3")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+
+[node name="ViewPoint" type="Node3D" parent="."]
+unique_name_in_owner = true

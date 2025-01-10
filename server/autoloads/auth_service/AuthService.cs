@@ -1,6 +1,5 @@
 using Godot;
 using SteampunkDnD.Shared;
-using System;
 using System.Collections.Generic;
 using MemoryPack;
 
@@ -9,12 +8,18 @@ namespace SteampunkDnD.Server;
 // WARN: This service does NOT use secure authentication
 public partial class AuthService : Node
 {
+    public static AuthService Singleton { get; private set; }
+
+    [Signal] public delegate void PlayerJoinedEventHandler(uint playerId);
+
     private uint ServerId;
     private List<uint> KnownPlayers;
     private readonly BidirectionalDictionary<int, uint> ClientToPlayerMap = new();
 
     public override void _Ready()
     {
+        Singleton = this;
+
         var transmitter = Multiplayer as SceneMultiplayer;
 
         transmitter.AuthCallback = new Callable(this, MethodName.OnAuthReceived);
@@ -24,6 +29,13 @@ public partial class AuthService : Node
         // TODO: Add ServerId serialization to and deserialization from save data
         ServerId = GenerateId();
         KnownPlayers = new();
+    }
+
+    public uint? GetPlayerId(int peer)
+    {
+        if (!ClientToPlayerMap.Forward.Contains(peer))
+            return null;
+        return ClientToPlayerMap.Forward[peer];
     }
 
     private void SendMessage(int peer, INetworkMessage message)
@@ -36,9 +48,16 @@ public partial class AuthService : Node
     private static uint GenerateId() =>
         (uint)((long)(Time.GetUnixTimeFromSystem() * 1000) % uint.MaxValue);
 
-    private void OnMessageReceived(int peer, INetworkMessage message)
+    private void CompleteAuth(int peer, uint playerId)
     {
         var transmitter = Multiplayer as SceneMultiplayer;
+        ClientToPlayerMap.Add(peer, playerId);
+        transmitter.CompleteAuth(peer);
+        EmitSignal(SignalName.PlayerJoined, playerId);
+    }
+
+    private void OnMessageReceived(int peer, INetworkMessage message)
+    {
         switch (message)
         {
             case ClientAuth clientAuth:
@@ -54,8 +73,7 @@ public partial class AuthService : Node
                     return;
                 }
 
-                ClientToPlayerMap.Add(peer, clientAuth.PlayerId);
-                transmitter.CompleteAuth(peer);
+                CompleteAuth(peer, clientAuth.PlayerId);
                 break;
             case NewPlayerIdRequest:
                 var playerId = GenerateId();
@@ -67,8 +85,7 @@ public partial class AuthService : Node
                 var newPlayerId = new NewPlayerId(playerId);
                 SendMessage(peer, newPlayerId);
 
-                ClientToPlayerMap.Add(peer, playerId);
-                transmitter.CompleteAuth(peer);
+                CompleteAuth(peer, playerId);
                 break;
             default:
                 Logger.Singleton.Log(LogLevel.Warning, $"Client {peer} sent incorrect auth message to server");

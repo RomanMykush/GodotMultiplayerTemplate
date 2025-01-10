@@ -1,5 +1,4 @@
 using Godot;
-using System;
 using System.Threading.Tasks;
 
 namespace SteampunkDnD.Shared;
@@ -12,14 +11,5 @@ public static class SceneUtils
         tree.CurrentScene.Free();
         tree.Root.AddChild(node);
         tree.CurrentScene = node;
-    }
-
-    public static void ClearChildren(this Node parent)
-    {
-        foreach (var child in parent.GetChildren())
-        {
-            parent.RemoveChild(child);
-            child.QueueFree();
-        }
     }
 }

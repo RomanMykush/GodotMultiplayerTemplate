@@ -1,6 +1,7 @@
 using Godot;
 using SteampunkDnD.Shared;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace SteampunkDnD.Server;
 
@@ -11,6 +12,8 @@ public partial class GameWorld : Node
     [Signal] public delegate void SnapshotGeneratedEventHandler(GodotWrapper<StateSnapshot> wrapper);
 
     private EntityContainer Entities;
+
+    public readonly List<CharacterController> Controllers = new();
 
     public override void _Ready()
     {
@@ -32,6 +35,13 @@ public partial class GameWorld : Node
     {
         // Clear previous level
         Entities.DeleteAll();
+        foreach (var node in Controllers)
+        {
+            if (node is PlayerController)
+                continue;
+            node.QueueFree();
+        }
+        Controllers.Clear();
 
         // Add new level childrens
         foreach (var child in level.GetChildren())
@@ -44,6 +54,10 @@ public partial class GameWorld : Node
                     node.ProcessMode = ProcessModeEnum.Disabled;
                     Entities.Add(entity);
                     break;
+                case CharacterController controller:
+                    Controllers.Add(controller);
+                    AddChild(controller);
+                    break;
                 default:
                     Logger.Singleton.Log(LogLevel.Warning, $"Unsupported type {child.GetType().Name} detected in level");
                     break;
@@ -53,7 +67,9 @@ public partial class GameWorld : Node
 
     private void OnTickUpdated(uint currentTick, float tickTimeDelta)
     {
-        // TODO: Add player and AI input processing
+        // Process character controllers
+        foreach (var controller in Controllers)
+            controller.ApplyCommands(currentTick);
 
         // Process entities
         foreach (var entity in Entities.GetAll())
@@ -67,7 +83,13 @@ public partial class GameWorld : Node
         foreach (var entity in Entities.GetAll())
             states.Add(entity.GetState());
 
-        var snapshot = new StateSnapshot(currentTick, states);
+        // Generate meta data
+        var playerControllers = Controllers
+            .OfType<PlayerController>().Where(c => c.Pawn != null);
+        var possesionMeta = playerControllers
+            .Select(c => new PlayerPossessionMeta(c.PlayerId, c.Pawn.EntityId));
+
+        var snapshot = new StateSnapshot(currentTick, states, possesionMeta);
         Network.Singleton.SendMessage(Network.BroadcastPeer, snapshot);
         EmitSignal(SignalName.SnapshotGenerated, new GodotWrapper<StateSnapshot>(snapshot));
     }
