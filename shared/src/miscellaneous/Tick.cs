@@ -5,9 +5,9 @@ namespace SteampunkDnD.Shared;
 
 public struct Tick
 {
-    public uint CurrentTick = 1; // TODO: Rename to TickCount
+    public uint TickCount = 1;
     public float TickDuration = 0; // Seconds passed through previous tick
-    public uint TickRate = 0; // Ticks in one second
+    public uint TickRate = 0; // Ticks per second
     public readonly float TickInterval => 1.0f / TickRate;
     public const float Epsilon = 1e-6f;
 
@@ -19,11 +19,11 @@ public struct Tick
     public Tick AddDuration(float duration)
     {
         float newTickDuration = TickDuration + duration;
-        uint newCurrentTick;
+        uint newTickCount;
         if (newTickDuration >= 0)
         {
             uint deltaTicks = (uint)Mathf.FloorToInt(newTickDuration * TickRate);
-            newCurrentTick = CurrentTick + deltaTicks;
+            newTickCount = TickCount + deltaTicks;
             // Adding epsilon to avoid rounding error
             newTickDuration += Epsilon;
             newTickDuration %= TickInterval;
@@ -33,7 +33,7 @@ public struct Tick
         else
         {
             uint deltaTicks = (uint)Mathf.CeilToInt(-newTickDuration * TickRate);
-            newCurrentTick = CurrentTick - deltaTicks;
+            newTickCount = TickCount - deltaTicks;
             // Adding epsilon to avoid rounding error
             newTickDuration += Epsilon;
             newTickDuration %= TickInterval;
@@ -41,7 +41,7 @@ public struct Tick
             newTickDuration += TickInterval;
             newTickDuration = Math.Max(newTickDuration, 0);
         }
-        return new Tick(TickRate) { CurrentTick = newCurrentTick, TickDuration = newTickDuration };
+        return new Tick(TickRate) { TickCount = newTickCount, TickDuration = newTickDuration };
     }
 
     public static float GetDuration(Tick start, Tick end)
@@ -52,7 +52,7 @@ public struct Tick
             return 0;
         }
 
-        float result = ((float)end.CurrentTick - start.CurrentTick) * start.TickInterval + end.TickDuration - start.TickDuration;
+        float result = ((float)end.TickCount - start.TickCount) * start.TickInterval + end.TickDuration - start.TickDuration;
         return result;
     }
 
@@ -60,13 +60,13 @@ public struct Tick
         obj != null && GetType() == obj.GetType() && this == (Tick)obj;
 
     public override readonly int GetHashCode() =>
-        (CurrentTick, TickDuration, TickRate).GetHashCode();
+        (TickCount, TickDuration, TickRate).GetHashCode();
 
     public static bool operator ==(Tick a, Tick b)
     {
         if (a.TickRate != b.TickRate)
             throw new InvalidOperationException("TickRate value doesn't match");
-        return a.CurrentTick == b.CurrentTick && a.TickDuration == b.TickDuration;
+        return a.TickCount == b.TickCount && a.TickDuration == b.TickDuration;
     }
 
     public static bool operator !=(Tick a, Tick b) => !(a == b);
@@ -75,14 +75,14 @@ public struct Tick
     {
         if (a.TickRate != b.TickRate)
             throw new InvalidOperationException("TickRate value doesn't match");
-        return a.CurrentTick < b.CurrentTick || a.TickDuration < b.TickDuration;
+        return a.TickCount < b.TickCount || a.TickDuration < b.TickDuration;
     }
 
     public static bool operator >(Tick a, Tick b)
     {
         if (a.TickRate != b.TickRate)
             throw new InvalidOperationException("TickRate value doesn't match");
-        return a.CurrentTick > b.CurrentTick || a.TickDuration > b.TickDuration;
+        return a.TickCount > b.TickCount || a.TickDuration > b.TickDuration;
     }
 
     public static bool operator <=(Tick a, Tick b) => !(a > b);
@@ -90,5 +90,5 @@ public struct Tick
     public static bool operator >=(Tick a, Tick b) => !(a < b);
 
     public override readonly string ToString() =>
-        $"{CurrentTick}:{TickDuration:0.####}";
+        $"{TickCount}:{TickDuration:0.####}";
 }

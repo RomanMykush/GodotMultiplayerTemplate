@@ -77,20 +77,20 @@ public partial class GameWorld : Node
     private void OnInterpolationTickUpdated(GodotWrapper<Tick> wrapper)
     {
         var tick = wrapper.Value;
-        DeleteOldSnapshots(tick.CurrentTick);
+        DeleteOldSnapshots(tick.TickCount);
 
         // Check if at least 2 snapshots exist
         if (Snapshots.Count < 2)
             return;
         var pastSnapshot = Snapshots.Min;
-        if (pastSnapshot.Tick > tick.CurrentTick)
+        if (pastSnapshot.Tick > tick.TickCount)
             return;
 
         // Get future snapshot
         StateSnapshot futureSnapshot = null;
         foreach (var snapshot in Snapshots.Skip(1))
         {
-            if (snapshot.Tick > tick.CurrentTick)
+            if (snapshot.Tick > tick.TickCount)
             {
                 futureSnapshot = snapshot;
                 break;
@@ -128,7 +128,7 @@ public partial class GameWorld : Node
 
         // Get interpolation theta between past and future snapshots
         float tickInterval = futureSnapshot.Tick - pastSnapshot.Tick;
-        float presentDeltaTick = tick.CurrentTick - pastSnapshot.Tick;
+        float presentDeltaTick = tick.TickCount - pastSnapshot.Tick;
         float theta = presentDeltaTick / tickInterval + tick.TickDuration * tick.TickRate / tickInterval;
 
         // Interpolate states
@@ -203,7 +203,7 @@ public partial class GameWorld : Node
             return;
         pawn.ApplyState(initialState);
 
-        var relevantTicks = PredictionTicks.Where(m => m.Value.CurrentTick >= snapshotTick);
+        var relevantTicks = PredictionTicks.Where(m => m.Value.TickCount >= snapshotTick);
         if (!relevantTicks.Any())
             return;
 
@@ -245,27 +245,27 @@ public partial class GameWorld : Node
             float delta = clientTickDeltas[id];
             var leftSideTick = tick.AddDuration(-delta);
             // Check if first client tick is fully inside single server tick
-            if (leftSideTick.CurrentTick == tick.CurrentTick)
+            if (leftSideTick.TickCount == tick.TickCount)
             {
-                splitedClientTicks.AppendItemToList(tick.CurrentTick + 1, (id, tick, delta));
+                splitedClientTicks.AppendItemToList(tick.TickCount + 1, (id, tick, delta));
                 continue;
             }
 
             // Add first part of tick
             float firstTickDelta = tick.TickInterval - leftSideTick.TickDuration;
-            splitedClientTicks.AppendItemToList(leftSideTick.CurrentTick + 1,
-                (id, new Tick(tick.TickRate) { CurrentTick = leftSideTick.CurrentTick + 1 }, firstTickDelta));
+            splitedClientTicks.AppendItemToList(leftSideTick.TickCount + 1,
+                (id, new Tick(tick.TickRate) { TickCount = leftSideTick.TickCount + 1 }, firstTickDelta));
 
             // Add remaining parts
             float durationRemnants = delta - firstTickDelta;
-            uint currentServerTick = leftSideTick.CurrentTick + 1;
+            uint currentServerTick = leftSideTick.TickCount + 1;
             while (true)
             {
                 if (durationRemnants > tick.TickInterval)
                 {
                     currentServerTick++;
                     splitedClientTicks.AppendItemToList(currentServerTick,
-                        (id, new Tick(tick.TickRate) { CurrentTick = currentServerTick }, tick.TickInterval));
+                        (id, new Tick(tick.TickRate) { TickCount = currentServerTick }, tick.TickInterval));
                     durationRemnants -= tick.TickInterval;
                     continue;
                 }
@@ -309,7 +309,7 @@ public partial class GameWorld : Node
         if (LastPredictionSnapshot != latestSnapshot)
         {
             // Get index of last outdated tick
-            index = PredictionTicks.FindLastIndex((v) => v.Value.CurrentTick < latestSnapshot.Tick);
+            index = PredictionTicks.FindLastIndex((v) => v.Value.TickCount < latestSnapshot.Tick);
             if (index != -1)
             {
                 // Extract all outdated ticks
@@ -347,7 +347,7 @@ public partial class GameWorld : Node
 
         // Generating pending commands
         var pendingCommands = DivideByServerTicks(PredictionTicks, PredictionTickDeltas)
-            .Where(kv => kv.Key > latestSnapshot.Tick && kv.Key < currentTick.CurrentTick + 1) // TODO: Can be optimized
+            .Where(kv => kv.Key > latestSnapshot.Tick && kv.Key < currentTick.TickCount + 1) // TODO: Can be optimized
             .Select(kv => new KeyValuePair<uint, IEnumerable<(uint id, float delta, IEnumerable<ICommand> commands)>>(
                 kv.Key, kv.Value.Select(t => PlayerController.Singleton.TryGetCommands(t.id, out var commands)
                     ? (t.id, t.delta, commands) : (t.id, t.delta, emptyCommands)))) // Check if commands exists
