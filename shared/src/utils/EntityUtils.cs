@@ -54,7 +54,8 @@ public static class EntityUtils
                 return pastStaticState with
                 {
                     Position = pastStaticState.Position.Lerp(futureStaticState.Position, theta),
-                    Rotation = pastStaticState.Rotation.Slerp(futureStaticState.Rotation, theta)
+                    Rotation = Quaternion.FromEuler(pastStaticState.Rotation)
+                        .Slerp(Quaternion.FromEuler(futureStaticState.Rotation), theta).GetEuler()
                 };
 
             case CharacterState pastCharacterState:
@@ -67,7 +68,8 @@ public static class EntityUtils
                 return pastCharacterState with
                 {
                     Position = pastCharacterState.Position.Lerp(futureCharacterState.Position, theta),
-                    Rotation = pastCharacterState.Rotation.Slerp(futureCharacterState.Rotation, theta),
+                    Rotation = Quaternion.FromEuler(pastCharacterState.Rotation)
+                        .Slerp(Quaternion.FromEuler(futureCharacterState.Rotation), theta).GetEuler(),
                     Velocity = pastCharacterState.Velocity.Lerp(futureCharacterState.Velocity, theta)
                 };
             default:
