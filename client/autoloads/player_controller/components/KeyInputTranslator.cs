@@ -13,7 +13,7 @@ public partial class KeyInputTranslator : Node, ICommandSource
 
     public Vector2 RotateByPawn(Vector2 initial)
     {
-        var moveDir = new Vector3(initial.X, 0, -initial.Y);
+        var moveDir = new Vector3(initial.X, 0, initial.Y);
         moveDir = Pawn.GlobalBasis * moveDir;
         return new Vector2(moveDir.X, moveDir.Z);
     }
