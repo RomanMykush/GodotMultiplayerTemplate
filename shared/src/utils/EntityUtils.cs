@@ -30,6 +30,7 @@ public static class EntityUtils
 
                 packedScene = GD.Load<PackedScene>(path);
                 var character = packedScene.Instantiate() as Character;
+                character.LoadChildren();
                 character.ApplyState(characterState);
                 return character;
             default:

@@ -30,10 +30,12 @@ public partial class CameraContainer : Node3D, ICommandSource
                 _pawn.ViewUpdated += OnViewUpdated;
                 Input.MouseMode = Input.MouseModeEnum.Captured;
                 // Update camera view
-                _pawn.UpdateViewPoint(_pawn.GetGlobalForward());
+                MainCamera.Rotation = _pawn.ViewPoint.Rotation;
+                GlobalRotation = _pawn.Rotation;
             }
         }
     }
+    private const float MinViewTargetDistance = 10;
     private const float MaxViewTargetDistance = 100;
 
     // TODO: Implement settings menu
@@ -55,7 +57,9 @@ public partial class CameraContainer : Node3D, ICommandSource
 
         if (@event is InputEventMouseMotion mouseMoveEvent)
         {
-            MainCamera.RotateX(-mouseMoveEvent.Relative.Y * Sensitivity);
+            float cameraRotation = Mathf.Clamp(MainCamera.Rotation.X - mouseMoveEvent.Relative.Y * Sensitivity,
+                Mathf.DegToRad(-Pawn.ViewAngleСonstraint), Mathf.DegToRad(Pawn.ViewAngleСonstraint));
+            MainCamera.Rotation = new Vector3(cameraRotation, 0, 0);
             RotateY(-mouseMoveEvent.Relative.X * Sensitivity);
 
             Pawn.UpdateViewPoint(MainCamera.GetGlobalForward());
@@ -71,15 +75,17 @@ public partial class CameraContainer : Node3D, ICommandSource
     {
         var spaceState = GetWorld3D().DirectSpaceState;
 
-        var distantViewPoint = GlobalPosition + this.GetGlobalForward() * MaxViewTargetDistance;
-        var query = PhysicsRayQueryParameters3D.Create(GlobalPosition, distantViewPoint, exclude: PawnRid);
+        var distantViewPoint = MainCamera.GlobalPosition + MainCamera.GetGlobalForward() * MaxViewTargetDistance;
+        var query = PhysicsRayQueryParameters3D.Create(MainCamera.GlobalPosition, distantViewPoint, exclude: PawnRid);
         var result = spaceState.IntersectRay(query);
 
         // Check if there is any collision
         if (result.Count <= 0)
             return distantViewPoint;
 
-        return result["position"].AsVector3();
+        var target = result["position"].AsVector3();
+        return MainCamera.GlobalPosition.DistanceSquaredTo(target) > MinViewTargetDistance * MinViewTargetDistance
+            ? target : distantViewPoint;
     }
 
     public ICollection<ICommand> CollectCommands()
@@ -89,9 +95,9 @@ public partial class CameraContainer : Node3D, ICommandSource
         return new List<ICommand>() { command };
     }
 
-    private void OnViewUpdated(Transform3D bodyTransform, Transform3D viewPointTransform)
+    private void OnViewUpdated(Vector3 viewPosition)
     {
-        GlobalTransform = bodyTransform;
-        MainCamera.GlobalTransform = viewPointTransform;
+        // TODO: Add position interpolation for smooth movement
+        GlobalPosition = viewPosition;
     }
 }

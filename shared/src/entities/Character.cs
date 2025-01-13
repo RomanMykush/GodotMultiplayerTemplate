@@ -7,19 +7,24 @@ namespace SteampunkDnD.Shared;
 
 public partial class Character : CharacterBody3D, ISpatial, IControlable
 {
-    [Signal] public delegate void ViewUpdatedEventHandler(Transform3D bodyTransform, Transform3D viewPointTransform);
+    [Signal] public delegate void ViewUpdatedEventHandler(Vector3 viewPosition);
 
-    private Node3D ViewPoint;
+    public Node3D ViewPoint { get; private set; }
 
     [Export] public string Kind { get; private set; }
-    [Export(PropertyHint.Range, "0,90,")] private float ViewAngleСonstraint = 85;
+    [Export(PropertyHint.Range, "0,90,")] public float ViewAngleСonstraint { get; private set; } = 85;
 
     public uint EntityId { get; private set; }
     private IEnumerable<ICommand> LastInputs = new List<ICommand>();
 
-    public override void _Ready()
+    public void LoadChildren()
     {
         ViewPoint = GetNode<Node3D>("%ViewPoint");
+    }
+
+    public override void _Ready()
+    {
+        LoadChildren();
     }
 
     public void ReceiveCommands(IEnumerable<ICommand> commands) =>
@@ -39,27 +44,28 @@ public partial class Character : CharacterBody3D, ISpatial, IControlable
         angleTo = ViewPoint.GetGlobalForward()
             .SignedAngleTo(direction, ViewPoint.GetGlobalRight());
 
-        ViewPoint.RotateX(angleTo);
-        ViewPoint.Rotation = ViewPoint.Rotation with
-        {
-            X = Mathf.Clamp(ViewPoint.Rotation.X,
-                Mathf.DegToRad(-ViewAngleСonstraint),
-                Mathf.DegToRad(ViewAngleСonstraint))
-        };
+        float viewRotation = Mathf.Clamp(ViewPoint.Rotation.X + angleTo,
+            Mathf.DegToRad(-ViewAngleСonstraint), Mathf.DegToRad(ViewAngleСonstraint));
+        ViewPoint.Rotation = new Vector3(viewRotation, 0, 0);
 
-        EmitSignal(SignalName.ViewUpdated, GlobalTransform, ViewPoint.GlobalTransform);
+        EmitSignal(SignalName.ViewUpdated, ViewPoint.GlobalPosition);
     }
 
     public override void _PhysicsProcess(double delta)
     {
-        // TODO: Add physics and command processing
+        // Rotate character toward view target
+        var lookCommand = LastInputs.FirstOrDefault(c => c is LookAtCommand) as LookAtCommand;
+        if (lookCommand != null)
+            UpdateViewPoint(ViewPoint.GlobalPosition.DirectionTo(lookCommand.Target));
+
+        // TODO: Add physics and more command processing
 
         // Get all continuous inputs and mark them as not started recenty
         LastInputs = LastInputs.OfType<ContiniousCommand>()
             .Select(i => i with { JustStarted = false });
     }
 
-    public EntityState GetState() => new CharacterState(EntityId, Kind, Position, Rotation, Velocity);
+    public EntityState GetState() => new CharacterState(EntityId, Kind, Position, Rotation, ViewPoint.Rotation.X, Velocity);
 
     public void ApplyState(EntityState state)
     {
@@ -76,6 +82,7 @@ public partial class Character : CharacterBody3D, ISpatial, IControlable
 
         Position = characterState.Position;
         Rotation = characterState.Rotation;
+        ViewPoint.Rotation = new Vector3(characterState.ViewRotation, 0, 0);
         Velocity = characterState.Velocity;
     }
 }
