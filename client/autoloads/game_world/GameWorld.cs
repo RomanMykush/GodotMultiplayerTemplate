@@ -14,14 +14,23 @@ public partial class GameWorld : Node
 
     private readonly SortedSet<StateSnapshot> Snapshots = new(new StateSnapshotTickComparer());
     private StateSnapshot LastInterpolationSnapshot = new(0, new List<EntityState>(), new List<IMeta>());
+    private StateSnapshot LastPredictionSnapshot = new(0, new List<EntityState>(), new List<IMeta>());
+    private List<MarkedValue<Tick>> PredictionTicks = new(); // sorted list of prediction ticks with their ids
+    private readonly Dictionary<uint, float> PredictionTickDeltas = new(); // dictionary of tick ids with their physics delta times
     private readonly EntityStateIdComparer EntityComparer = new();
 
     public override void _Ready()
     {
         Singleton = this;
 
+        var physicsSpace = GetViewport().World3D.Space;
         Container = GetNode<EntityContainer>("%Container");
         Container.ProcessMode = ProcessModeEnum.Disabled;
+        Container.OnAddition = (e) =>
+        {
+            if (e is CollisionObject3D body)
+                PhysicsServer3D.BodySetSpace(body.GetRid(), physicsSpace);
+        };
 
         TickClock.Singleton.InterpolationTickUpdated += OnInterpolationTickUpdated;
         TickClock.Singleton.ExtrapolationTickUpdated += OnExtrapolationTickUpdated;
@@ -170,9 +179,189 @@ public partial class GameWorld : Node
         // Run if there left only one old snapshot
     }
 
+    private void CheckTickRateChange(Tick newTick)
+    {
+        if (PredictionTicks.Count < 1)
+            return;
+
+        var originalTickRate = PredictionTicks.First().Value.TickRate;
+        if (originalTickRate != newTick.TickRate)
+        {
+            // TODO: Implement commands translation into new tick rate
+            Logger.Singleton.Log(LogLevel.Warning, "New tickrate detected. Removing all commands");
+
+            // TEMP solution: Remove all commands and deltas
+            foreach (var invalidTick in PredictionTicks)
+                PlayerController.Singleton.RemoveCommands(invalidTick.Id);
+            PredictionTickDeltas.Clear();
+        }
+    }
+
+    private void ApplyPrediction(uint snapshotTick, EntityState initialState, Character pawn, PlayerController controller)
+    {
+        if (initialState == null)
+            return;
+        pawn.ApplyState(initialState);
+
+        var relevantTicks = PredictionTicks.Where(m => m.Value.CurrentTick >= snapshotTick);
+        if (!relevantTicks.Any())
+            return;
+
+        // Rewind simulation for first prediction tick after snapshot
+        var firstTick = relevantTicks.First();
+        if (controller.TryGetCommands(firstTick.Id, out var commands))
+            pawn.ReceiveCommands(commands);
+
+        float delta = Math.Min(firstTick.Value.TickDuration, PredictionTickDeltas[firstTick.Id]);
+        pawn.ManualProcess(delta);
+        pawn.ManualPhysicsProcess(delta);
+
+        // Rewind simulation for rest of ticks
+        foreach (var markedTick in relevantTicks.Skip(1))
+        {
+            if (controller.TryGetCommands(markedTick.Id, out commands))
+                pawn.ReceiveCommands(commands);
+
+            // Simulate character
+            delta = PredictionTickDeltas[markedTick.Id];
+            pawn.ManualProcess(delta);
+            pawn.ManualPhysicsProcess(delta);
+        }
+    }
+
+    private uint GenerateTickId()
+    {
+        uint current = (uint)Random.Shared.Next();
+        while (PredictionTicks.Any(k => k.Id == current))
+            current++;
+        return current;
+    }
+
+    private static Dictionary<uint, List<(uint id, Tick tick, float delta)>> DivideByServerTicks(List<MarkedValue<Tick>> clientTicks, Dictionary<uint, float> clientTickDeltas)
+    {
+        var splitedClientTicks = new Dictionary<uint, List<(uint id, Tick tick, float delta)>>();
+        foreach (var (id, tick) in clientTicks)
+        {
+            float delta = clientTickDeltas[id];
+            var leftSideTick = tick.AddDuration(-delta);
+            // Check if first client tick is fully inside single server tick
+            if (leftSideTick.CurrentTick == tick.CurrentTick)
+            {
+                splitedClientTicks.AppendItemToList(tick.CurrentTick + 1, (id, tick, delta));
+                continue;
+            }
+
+            // Add first part of tick
+            float firstTickDelta = tick.TickInterval - leftSideTick.TickDuration;
+            splitedClientTicks.AppendItemToList(leftSideTick.CurrentTick + 1,
+                (id, new Tick(tick.TickRate) { CurrentTick = leftSideTick.CurrentTick + 1 }, firstTickDelta));
+
+            // Add remaining parts
+            float durationRemnants = delta - firstTickDelta;
+            uint currentServerTick = leftSideTick.CurrentTick + 1;
+            while (true)
+            {
+                if (durationRemnants > tick.TickInterval)
+                {
+                    currentServerTick++;
+                    splitedClientTicks.AppendItemToList(currentServerTick,
+                        (id, new Tick(tick.TickRate) { CurrentTick = currentServerTick }, tick.TickInterval));
+                    durationRemnants -= tick.TickInterval;
+                    continue;
+                }
+                // Add last part
+                splitedClientTicks.AppendItemToList(currentServerTick + 1, (id, tick, tick.TickDuration));
+                break;
+            }
+        }
+        return splitedClientTicks;
+    }
+
     private void OnPredictionTickUpdated(GodotWrapper<Tick> wrapper, float tickDelta)
     {
-        // TODO: Implement this
-        // Get last known state and rewind simulation with known inputs
+        if (Snapshots.Count < 1)
+            return;
+        var currentTick = wrapper.Value;
+
+        CheckTickRateChange(currentTick);
+
+        // Check if next prediction tick is less then previous one(s)
+        int index = PredictionTicks.FindIndex((v) => v.Value >= currentTick);
+        if (index != -1)
+        {
+            Logger.Singleton.Log(LogLevel.Warning, "New prediction tick is less then previous one(s). Removing commands associated with newer ticks");
+
+            // Extract all newer tick ids
+            var invalidMarkedTicks = PredictionTicks
+                .GetRange(index, PredictionTicks.Count - index);
+            // Leave all other ones
+            PredictionTicks = PredictionTicks.GetRange(0, index);
+            // Remove old commands and deltas
+            foreach (var markedTick in invalidMarkedTicks)
+            {
+                PlayerController.Singleton.RemoveCommands(markedTick.Id);
+                PredictionTickDeltas.Remove(markedTick.Id);
+            }
+        }
+
+        // Check if there is new latest snapshot
+        var latestSnapshot = Snapshots.Max;
+        if (LastPredictionSnapshot != latestSnapshot)
+        {
+            // Get index of last outdated tick
+            index = PredictionTicks.FindLastIndex((v) => v.Value.CurrentTick < latestSnapshot.Tick);
+            if (index != -1)
+            {
+                // Extract all outdated ticks
+                var oldMarkedTicks = PredictionTicks.GetRange(0, index + 1);
+                // Remove old commands and deltas
+                foreach (var markedTick in oldMarkedTicks)
+                {
+                    PlayerController.Singleton.RemoveCommands(markedTick.Id);
+                    PredictionTickDeltas.Remove(markedTick.Id);
+                }
+                // Leave all relevant ticks
+                PredictionTicks = PredictionTicks
+                    .GetRange(index + 1, PredictionTicks.Count - (index + 1));
+            }
+
+            if (PlayerController.Singleton.Pawn != null)
+            {
+                var characterState = latestSnapshot.States
+                    .FirstOrDefault(s => s.EntityId == PlayerController.Singleton.Pawn.EntityId);
+
+                ApplyPrediction(latestSnapshot.Tick, characterState, PlayerController.Singleton.Pawn, PlayerController.Singleton);
+            }
+        }
+        LastPredictionSnapshot = latestSnapshot;
+
+        var newTickId = GenerateTickId();
+        PredictionTicks.Add(new MarkedValue<Tick>(newTickId, currentTick));
+
+        // Collect player input
+        var collectedCommands = PlayerController.Singleton.CollectCommands(newTickId);
+        PredictionTickDeltas.Add(newTickId, tickDelta);
+
+        // Create placeholder data to avoid unnecessary allocations
+        var emptyCommands = new List<ICommand>();
+
+        // Generating pending commands
+        var pendingCommands = DivideByServerTicks(PredictionTicks, PredictionTickDeltas)
+            .Where(kv => kv.Key > latestSnapshot.Tick && kv.Key < currentTick.CurrentTick + 1) // TODO: Can be optimized
+            .Select(kv => new KeyValuePair<uint, IEnumerable<(uint id, float delta, IEnumerable<ICommand> commands)>>(
+                kv.Key, kv.Value.Select(t => PlayerController.Singleton.TryGetCommands(t.id, out var commands)
+                    ? (t.id, t.delta, commands) : (t.id, t.delta, emptyCommands)))) // Check if commands exists
+            .Select(kv => new CommandSnapshot(kv.Key, CommandUtils.MergeCommands(kv.Value, currentTick.TickInterval)));
+
+        // Send all unprocessed by server commands
+        var recentCommands = new RecentCommandSnapshots(pendingCommands);
+        Network.Singleton.SendMessage(recentCommands);
+
+        // Simulate character
+        if (PlayerController.Singleton.Pawn != null)
+        {
+            PlayerController.Singleton.Pawn.ReceiveCommands(collectedCommands);
+            PlayerController.Singleton.Pawn.ManualPhysicsProcess(tickDelta);
+        }
     }
 }

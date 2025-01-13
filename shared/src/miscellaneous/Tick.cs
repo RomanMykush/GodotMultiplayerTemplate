@@ -56,6 +56,39 @@ public struct Tick
         return result;
     }
 
+    public override readonly bool Equals(object obj) =>
+        obj != null && GetType() == obj.GetType() && this == (Tick)obj;
+
+    public override readonly int GetHashCode() =>
+        (CurrentTick, TickDuration, TickRate).GetHashCode();
+
+    public static bool operator ==(Tick a, Tick b)
+    {
+        if (a.TickRate != b.TickRate)
+            throw new InvalidOperationException("TickRate value doesn't match");
+        return a.CurrentTick == b.CurrentTick && a.TickDuration == b.TickDuration;
+    }
+
+    public static bool operator !=(Tick a, Tick b) => !(a == b);
+
+    public static bool operator <(Tick a, Tick b)
+    {
+        if (a.TickRate != b.TickRate)
+            throw new InvalidOperationException("TickRate value doesn't match");
+        return a.CurrentTick < b.CurrentTick || a.TickDuration < b.TickDuration;
+    }
+
+    public static bool operator >(Tick a, Tick b)
+    {
+        if (a.TickRate != b.TickRate)
+            throw new InvalidOperationException("TickRate value doesn't match");
+        return a.CurrentTick > b.CurrentTick || a.TickDuration > b.TickDuration;
+    }
+
+    public static bool operator <=(Tick a, Tick b) => !(a > b);
+
+    public static bool operator >=(Tick a, Tick b) => !(a < b);
+
     public override readonly string ToString() =>
         $"{CurrentTick}:{TickDuration:0.####}";
 }

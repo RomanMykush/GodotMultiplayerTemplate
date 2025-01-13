@@ -17,6 +17,11 @@ public partial class Character : CharacterBody3D, ISpatial, IControlable
     public uint EntityId { get; private set; }
     private IEnumerable<ICommand> LastInputs = new List<ICommand>();
 
+    // TODO: Put those properties in a separate physics logic components
+    [Export] public float Gravity { get; private set; }
+    [Export] public float JumpVelocity { get; private set; }
+    [Export] public float Speed { get; private set; }
+
     public void LoadChildren()
     {
         ViewPoint = GetNode<Node3D>("%ViewPoint");
@@ -51,18 +56,72 @@ public partial class Character : CharacterBody3D, ISpatial, IControlable
         EmitSignal(SignalName.ViewUpdated, ViewPoint.GlobalPosition);
     }
 
-    public override void _PhysicsProcess(double delta)
+    public void ManualProcess(double delta)
+    {
+        // TODO: Add more logic
+        _Process(delta);
+    }
+
+    private Vector3 CalculateVelocity(double delta)
+    {
+        // TODO: Refactor this to allow other movement and physics types
+        Vector3 resultVelocity = Velocity;
+
+        if (!IsOnFloor())
+            resultVelocity.Y -= Gravity * (float)delta;
+
+        if (LastInputs.Any(c => c is JumpCommand) && IsOnFloor())
+            resultVelocity.Y += JumpVelocity;
+
+        var moveCommand = LastInputs.FirstOrDefault(c => c is MoveCommand) as MoveCommand;
+        var inputDir = moveCommand != null ? moveCommand.Direction : Vector2.Zero;
+        var direction = new Vector3(inputDir.X, 0, inputDir.Y);
+
+        if (inputDir != Vector2.Zero)
+        {
+            resultVelocity.X = direction.X * Speed;
+            resultVelocity.Z = direction.Z * Speed;
+        }
+        else
+        {
+            resultVelocity.X = 0;
+            resultVelocity.Z = 0;
+        }
+
+        return resultVelocity;
+    }
+
+    private void AdvancePhysics()
     {
         // Rotate character toward view target
         var lookCommand = LastInputs.FirstOrDefault(c => c is LookAtCommand) as LookAtCommand;
         if (lookCommand != null)
             UpdateViewPoint(ViewPoint.GlobalPosition.DirectionTo(lookCommand.Target));
 
-        // TODO: Add physics and more command processing
+        MoveAndSlide();
 
         // Get all continuous inputs and mark them as not started recenty
         LastInputs = LastInputs.OfType<ContiniousCommand>()
             .Select(i => i with { JustStarted = false });
+    }
+
+    public override void _PhysicsProcess(double delta)
+    {
+        Velocity = CalculateVelocity(delta);
+        AdvancePhysics();
+    }
+
+    public void ManualPhysicsProcess(double delta)
+    {
+        Velocity = CalculateVelocity(delta);
+
+        // TODO: Change after this PR gets merged: https://github.com/godotengine/godot/pull/76462 
+        // Apply workaround from https://github.com/godotengine/godot-proposals/issues/2821#issuecomment-854081858
+        double defaultDelta = Engine.IsInPhysicsFrame() ? GetPhysicsProcessDeltaTime() : GetProcessDeltaTime();
+        float timeFactor = (float)(delta / defaultDelta);
+        Velocity *= timeFactor;
+        AdvancePhysics();
+        Velocity /= timeFactor;
     }
 
     public EntityState GetState() => new CharacterState(EntityId, Kind, Position, Rotation, ViewPoint.Rotation.X, Velocity);
