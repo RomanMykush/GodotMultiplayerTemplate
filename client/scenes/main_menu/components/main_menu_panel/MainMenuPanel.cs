@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace SteampunkDnD.Client;
 
-public partial class MainMenu : Control
+public partial class MainMenuPanel : Control
 {
     // Exports
     [Export] private PackedScene HostGameMenuScene;

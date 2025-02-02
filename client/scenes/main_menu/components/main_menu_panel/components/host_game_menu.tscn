@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://2o0ewa233hyl"]
 
-[ext_resource type="Script" path="res://client/scenes/main_menu/components/HostGameMenu.cs" id="1_osf1q"]
+[ext_resource type="Script" path="res://client/scenes/main_menu/components/main_menu_panel/components/HostGameMenu.cs" id="1_osf1q"]
 
 [node name="HostGameMenu" type="MarginContainer"]
 custom_minimum_size = Vector2(200, 0)

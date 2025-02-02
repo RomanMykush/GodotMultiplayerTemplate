@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://1eml3sfpp73e"]
 
-[ext_resource type="Script" path="res://client/scenes/main_menu/components/JoinGameMenu.cs" id="1_1oufw"]
+[ext_resource type="Script" path="res://client/scenes/main_menu/components/main_menu_panel/components/JoinGameMenu.cs" id="1_1oufw"]
 
 [node name="JoinGameMenu" type="MarginContainer"]
 custom_minimum_size = Vector2(220, 0)
