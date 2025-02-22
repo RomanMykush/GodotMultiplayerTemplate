@@ -12,7 +12,7 @@ public partial class LatencyCalculator : Node, IInitializable
     [Signal] public delegate void LatencyCalculatedEventHandler(float avarage, float std);
 
     [Export] private uint MinSampleSize = 5;
-    [Export] private uint SampleSize = 15;
+    [Export] private uint SampleSize = 30;
 
     private readonly Queue<float> LatencySamples = new(); // Latency samples of Sync message in seconds
 

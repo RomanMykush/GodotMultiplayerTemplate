@@ -10,6 +10,7 @@ script = ExtResource("1_0y0cc")
 
 [node name="Pinger" parent="." instance=ExtResource("2_5nac8")]
 unique_name_in_owner = true
+wait_time = 0.1
 
 [node name="Calculator" parent="." instance=ExtResource("3_m4cqw")]
 unique_name_in_owner = true

@@ -16,7 +16,9 @@ public partial class TickClock : Node, IInitializable
     [Signal] public delegate void PredictionTickUpdatedEventHandler(GodotWrapper<Tick> wrapper, float tickDelta);
 
     // Exports
-    [Export(PropertyHint.Range, "1,5,")] private uint SafeTickMargin = 2;
+    // NOTE: After testing on 150ms/15ms normal deviation 2 was good enough, but 1.5 work great on localhost (Maybe it can even lower but not exactly 1)
+    // TODO: It looks like std is always lower then real value. Fix it
+    [Export(PropertyHint.Range, "1,5,")] private float SafeTickMargin = 2;
 
     // Child nodes
     private LatencyCalculator Calculator;
@@ -26,6 +28,7 @@ public partial class TickClock : Node, IInitializable
     // Other properties
     private float AvarageLatency;
     private float LatencyStd;
+    private float Jitter => 3 * LatencyStd; // Set jitter as 99.7% of distribution (or 3 standart deviations)
     private readonly Stopwatch TickUpdateStopwatch = new();
     private float PhysicsProcessDelta;
 
@@ -85,18 +88,11 @@ public partial class TickClock : Node, IInitializable
         return serverTick;
     }
 
-    private float CalculateOffsetBuffer(float tickInterval)
-    {
-        // Set jitter as 99.7% of distribution (or 3 standart deviations)
-        float jitter = 3 * LatencyStd;
-        return jitter + AvarageLatency + tickInterval * SafeTickMargin;
-    }
-
     public override void _Process(double _)
     {
         var serverTick = UpdateServerTick();
 
-        float buffer = CalculateOffsetBuffer(serverTick.TickInterval);
+        float buffer = Jitter + AvarageLatency + serverTick.TickInterval;
 
         // Calculate interpolation tick
         var interpolationTick = serverTick.AddDuration(-buffer);
@@ -107,7 +103,7 @@ public partial class TickClock : Node, IInitializable
     {
         var serverTick = UpdateServerTick();
 
-        float buffer = CalculateOffsetBuffer(serverTick.TickInterval);
+        float buffer = Jitter + AvarageLatency + serverTick.TickInterval * SafeTickMargin;
 
         // Add elapsed delta time from the last _Process call
         var extrapolationTick = serverTick.AddDuration(-buffer);
