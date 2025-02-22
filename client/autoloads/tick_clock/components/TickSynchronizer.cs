@@ -17,7 +17,7 @@ public partial class TickSynchronizer : Node, IInitializable
 
     // Other properties
     private float AvarageLatency;
-    private Tick CurrentServerTick;
+    private SoftTick CurrentServerTick;
     private float CatchUpTimeScale;
 
     public override void _Ready()
@@ -60,7 +60,7 @@ public partial class TickSynchronizer : Node, IInitializable
         syncInfoReceiveJob.Completed += () =>
         {
             // Set tick rate
-            CurrentServerTick = new Tick((uint)syncInfo.ServerTicksPerSecond);
+            CurrentServerTick = new SoftTick((uint)syncInfo.ServerTicksPerSecond);
 
             // Subscribe to Sync and SyncInfo messages
             Network.Singleton.MessageReceived += (msg) =>
@@ -80,7 +80,7 @@ public partial class TickSynchronizer : Node, IInitializable
     }
 
     /// <summary> Updates <c>CurrentServerTick</c> and return it with time-scaled delta time. </summary>
-    public (Tick, float) UpdateTick(float delta)
+    public (SoftTick, float) UpdateTick(float delta)
     {
         float finalDelta = delta * CatchUpTimeScale;
         CurrentServerTick = CurrentServerTick.AddDuration(finalDelta);
@@ -88,16 +88,16 @@ public partial class TickSynchronizer : Node, IInitializable
     }
 
     private void OnSyncInfoReceived(SyncInfo syncInfo) =>
-        CurrentServerTick = new Tick((uint)syncInfo.ServerTicksPerSecond) { TickCount = CurrentServerTick.TickCount };
+        CurrentServerTick = new SoftTick((uint)syncInfo.ServerTicksPerSecond) { TickCount = CurrentServerTick.TickCount };
 
     private void OnLatencyCalculated(float avarage, float _) => AvarageLatency = avarage;
 
     private void OnSyncReceived(Sync sync)
     {
-        var preferredTick = new Tick(CurrentServerTick.TickRate) { TickCount = sync.ServerTick }
+        var preferredTick = new SoftTick(CurrentServerTick.TickRate) { TickCount = sync.ServerTick }
             .AddDuration(AvarageLatency);
 
-        float errorTicksDelta = Tick.GetDuration(preferredTick, CurrentServerTick) * CurrentServerTick.TickRate;
+        float errorTicksDelta = SoftTick.GetDuration(preferredTick, CurrentServerTick) * CurrentServerTick.TickRate;
         if (Math.Abs(errorTicksDelta) > TolerableTickDifference)
         {
             // Hard catch up

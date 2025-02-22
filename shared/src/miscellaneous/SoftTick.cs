@@ -3,7 +3,7 @@ using System;
 
 namespace SteampunkDnD.Shared;
 
-public struct Tick
+public struct SoftTick
 {
     public uint TickCount = 1;
     public float TickDuration = 0; // Seconds passed through previous tick
@@ -11,12 +11,12 @@ public struct Tick
     public readonly float TickInterval => 1.0f / TickRate;
     public const float Epsilon = 1e-6f;
 
-    public Tick(uint tickRate)
+    public SoftTick(uint tickRate)
     {
         TickRate = tickRate;
     }
 
-    public Tick AddDuration(float duration)
+    public SoftTick AddDuration(float duration)
     {
         float newTickDuration = TickDuration + duration;
         uint newTickCount;
@@ -41,14 +41,14 @@ public struct Tick
             newTickDuration += TickInterval;
             newTickDuration = Math.Max(newTickDuration, 0);
         }
-        return new Tick(TickRate) { TickCount = newTickCount, TickDuration = newTickDuration };
+        return new SoftTick(TickRate) { TickCount = newTickCount, TickDuration = newTickDuration };
     }
 
-    public static float GetDuration(Tick start, Tick end)
+    public static float GetDuration(SoftTick start, SoftTick end)
     {
         if (start.TickRate != end.TickRate)
         {
-            Logger.Singleton.Log(LogLevel.Error, "Tried to subtract two instances of Tick with different TickRate value");
+            Logger.Singleton.Log(LogLevel.Error, $"Tried to subtract two instances of {nameof(SoftTick)} with different {nameof(TickRate)} value");
             return 0;
         }
 
@@ -57,37 +57,37 @@ public struct Tick
     }
 
     public override readonly bool Equals(object obj) =>
-        obj != null && GetType() == obj.GetType() && this == (Tick)obj;
+        obj != null && GetType() == obj.GetType() && this == (SoftTick)obj;
 
     public override readonly int GetHashCode() =>
         (TickCount, TickDuration, TickRate).GetHashCode();
 
-    public static bool operator ==(Tick a, Tick b)
+    public static bool operator ==(SoftTick a, SoftTick b)
     {
         if (a.TickRate != b.TickRate)
-            throw new InvalidOperationException("TickRate value doesn't match");
+            throw new InvalidOperationException($"{nameof(TickRate)} values doesn't match");
         return a.TickCount == b.TickCount && a.TickDuration == b.TickDuration;
     }
 
-    public static bool operator !=(Tick a, Tick b) => !(a == b);
+    public static bool operator !=(SoftTick a, SoftTick b) => !(a == b);
 
-    public static bool operator <(Tick a, Tick b)
+    public static bool operator <(SoftTick a, SoftTick b)
     {
         if (a.TickRate != b.TickRate)
-            throw new InvalidOperationException("TickRate value doesn't match");
+            throw new InvalidOperationException($"{nameof(TickRate)} values doesn't match");
         return a.TickCount < b.TickCount || a.TickDuration < b.TickDuration;
     }
 
-    public static bool operator >(Tick a, Tick b)
+    public static bool operator >(SoftTick a, SoftTick b)
     {
         if (a.TickRate != b.TickRate)
-            throw new InvalidOperationException("TickRate value doesn't match");
+            throw new InvalidOperationException($"{nameof(TickRate)} values doesn't match");
         return a.TickCount > b.TickCount || a.TickDuration > b.TickDuration;
     }
 
-    public static bool operator <=(Tick a, Tick b) => !(a > b);
+    public static bool operator <=(SoftTick a, SoftTick b) => !(a > b);
 
-    public static bool operator >=(Tick a, Tick b) => !(a < b);
+    public static bool operator >=(SoftTick a, SoftTick b) => !(a < b);
 
     public override readonly string ToString() =>
         $"{TickCount}:{TickDuration:0.####}";

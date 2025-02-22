@@ -26,7 +26,7 @@ public partial class PlayerController : Node
         }
     }
     /// <summary>
-    /// Dictionary of <c>Tick</c> ids with corresponding <c>Command</c>s.
+    /// Dictionary of <c>SoftTick</c> ids with corresponding <c>Command</c>s.
     /// </summary>
     private readonly Dictionary<uint, IEnumerable<ICommand>> BufferedCommands = new();
 

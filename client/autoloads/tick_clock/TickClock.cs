@@ -11,9 +11,9 @@ public partial class TickClock : Node, IInitializable
     public static TickClock Singleton { get; private set; }
 
     // Signals
-    [Signal] public delegate void InterpolationTickUpdatedEventHandler(GodotWrapper<Tick> wrapper);
-    [Signal] public delegate void ExtrapolationTickUpdatedEventHandler(GodotWrapper<Tick> wrapper, float tickDelta);
-    [Signal] public delegate void PredictionTickUpdatedEventHandler(GodotWrapper<Tick> wrapper, float tickDelta);
+    [Signal] public delegate void InterpolationTickUpdatedEventHandler(GodotWrapper<SoftTick> wrapper);
+    [Signal] public delegate void ExtrapolationTickUpdatedEventHandler(GodotWrapper<SoftTick> wrapper, float tickDelta);
+    [Signal] public delegate void PredictionTickUpdatedEventHandler(GodotWrapper<SoftTick> wrapper, float tickDelta);
 
     // Exports
     // NOTE: After testing on 150ms/15ms normal deviation 2 was good enough, but 1.5 work great on localhost (Maybe it can even lower but not exactly 1)
@@ -77,7 +77,7 @@ public partial class TickClock : Node, IInitializable
         return new List<JobInfo>() { new(combinedJobs) };
     }
 
-    private Tick UpdateServerTick()
+    private SoftTick UpdateServerTick()
     {
         // Getting precise delta
         double processDelta = TickUpdateStopwatch.Elapsed.TotalSeconds;
@@ -96,7 +96,7 @@ public partial class TickClock : Node, IInitializable
 
         // Calculate interpolation tick
         var interpolationTick = serverTick.AddDuration(-buffer);
-        EmitSignal(SignalName.InterpolationTickUpdated, new GodotWrapper<Tick>(interpolationTick));
+        EmitSignal(SignalName.InterpolationTickUpdated, new GodotWrapper<SoftTick>(interpolationTick));
     }
 
     public override void _PhysicsProcess(double _)
@@ -109,8 +109,8 @@ public partial class TickClock : Node, IInitializable
         var extrapolationTick = serverTick.AddDuration(-buffer);
         var predictionTick = serverTick.AddDuration(buffer);
 
-        EmitSignal(SignalName.ExtrapolationTickUpdated, new GodotWrapper<Tick>(extrapolationTick), PhysicsProcessDelta);
-        EmitSignal(SignalName.PredictionTickUpdated, new GodotWrapper<Tick>(predictionTick), PhysicsProcessDelta);
+        EmitSignal(SignalName.ExtrapolationTickUpdated, new GodotWrapper<SoftTick>(extrapolationTick), PhysicsProcessDelta);
+        EmitSignal(SignalName.PredictionTickUpdated, new GodotWrapper<SoftTick>(predictionTick), PhysicsProcessDelta);
         PhysicsProcessDelta = 0;
     }
 

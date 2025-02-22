@@ -15,7 +15,7 @@ public partial class GameWorld : Node
     private readonly SortedSet<StateSnapshot> Snapshots = new(new StateSnapshotTickComparer());
     private StateSnapshot LastInterpolationSnapshot = new(0, new List<EntityState>(), new List<IMeta>());
     private StateSnapshot LastPredictionSnapshot = new(0, new List<EntityState>(), new List<IMeta>());
-    private List<MarkedValue<Tick>> PredictionTicks = new(); // sorted list of prediction ticks with their ids
+    private List<MarkedValue<SoftTick>> PredictionTicks = new(); // sorted list of prediction ticks with their ids
     private readonly Dictionary<uint, float> PredictionTickDeltas = new(); // dictionary of tick ids with their physics delta times
     private readonly EntityStateIdComparer EntityComparer = new();
 
@@ -74,7 +74,7 @@ public partial class GameWorld : Node
         Snapshots.Add(first);
     }
 
-    private void OnInterpolationTickUpdated(GodotWrapper<Tick> wrapper)
+    private void OnInterpolationTickUpdated(GodotWrapper<SoftTick> wrapper)
     {
         var tick = wrapper.Value;
         DeleteOldSnapshots(tick.TickCount);
@@ -127,9 +127,9 @@ public partial class GameWorld : Node
             return;
 
         // Get interpolation theta between past and future snapshots
-        float tickInterval = futureSnapshot.Tick - pastSnapshot.Tick;
+        float snapshotsDeltaTick = futureSnapshot.Tick - pastSnapshot.Tick;
         float presentDeltaTick = tick.TickCount - pastSnapshot.Tick;
-        float theta = presentDeltaTick / tickInterval + tick.TickDuration * tick.TickRate / tickInterval;
+        float theta = (presentDeltaTick + tick.TickDuration * tick.TickRate) / snapshotsDeltaTick;
 
         // Interpolate states
         // TODO: Add a check for equality of past and future snapshots state types in case a malicious server sends different types, what can cause a crash
@@ -173,13 +173,13 @@ public partial class GameWorld : Node
         LastInterpolationSnapshot = pastSnapshot;
     }
 
-    private void OnExtrapolationTickUpdated(GodotWrapper<Tick> wrapper, float tickDelta)
+    private void OnExtrapolationTickUpdated(GodotWrapper<SoftTick> wrapper, float tickDelta)
     {
         // TODO: Implement this
         // Run if there left only one old snapshot
     }
 
-    private void CheckTickRateChange(Tick newTick)
+    private void CheckTickRateChange(SoftTick newTick)
     {
         if (PredictionTicks.Count < 1)
             return;
@@ -237,9 +237,9 @@ public partial class GameWorld : Node
         return current;
     }
 
-    private static Dictionary<uint, List<(uint id, Tick tick, float delta)>> DivideByServerTicks(List<MarkedValue<Tick>> clientTicks, Dictionary<uint, float> clientTickDeltas)
+    private static Dictionary<uint, List<(uint id, SoftTick tick, float delta)>> DivideByServerTicks(List<MarkedValue<SoftTick>> clientTicks, Dictionary<uint, float> clientTickDeltas)
     {
-        var splitedClientTicks = new Dictionary<uint, List<(uint id, Tick tick, float delta)>>();
+        var splitedClientTicks = new Dictionary<uint, List<(uint id, SoftTick tick, float delta)>>();
         foreach (var (id, tick) in clientTicks)
         {
             float delta = clientTickDeltas[id];
@@ -254,7 +254,7 @@ public partial class GameWorld : Node
             // Add first part of tick
             float firstTickDelta = tick.TickInterval - leftSideTick.TickDuration;
             splitedClientTicks.AppendItemToList(leftSideTick.TickCount + 1,
-                (id, new Tick(tick.TickRate) { TickCount = leftSideTick.TickCount + 1 }, firstTickDelta));
+                (id, new SoftTick(tick.TickRate) { TickCount = leftSideTick.TickCount + 1 }, firstTickDelta));
 
             // Add remaining parts
             float durationRemnants = delta - firstTickDelta;
@@ -265,7 +265,7 @@ public partial class GameWorld : Node
                 {
                     currentServerTick++;
                     splitedClientTicks.AppendItemToList(currentServerTick,
-                        (id, new Tick(tick.TickRate) { TickCount = currentServerTick }, tick.TickInterval));
+                        (id, new SoftTick(tick.TickRate) { TickCount = currentServerTick }, tick.TickInterval));
                     durationRemnants -= tick.TickInterval;
                     continue;
                 }
@@ -277,7 +277,7 @@ public partial class GameWorld : Node
         return splitedClientTicks;
     }
 
-    private void OnPredictionTickUpdated(GodotWrapper<Tick> wrapper, float tickDelta)
+    private void OnPredictionTickUpdated(GodotWrapper<SoftTick> wrapper, float tickDelta)
     {
         if (Snapshots.Count < 1)
             return;
@@ -314,15 +314,15 @@ public partial class GameWorld : Node
             {
                 // Extract all outdated ticks
                 var oldMarkedTicks = PredictionTicks.GetRange(0, index + 1);
+                // Leave all relevant ticks
+                PredictionTicks = PredictionTicks
+                    .GetRange(index + 1, PredictionTicks.Count - (index + 1));
                 // Remove old commands and deltas
                 foreach (var markedTick in oldMarkedTicks)
                 {
                     PlayerController.Singleton.RemoveCommands(markedTick.Id);
                     PredictionTickDeltas.Remove(markedTick.Id);
                 }
-                // Leave all relevant ticks
-                PredictionTicks = PredictionTicks
-                    .GetRange(index + 1, PredictionTicks.Count - (index + 1));
             }
 
             if (PlayerController.Singleton.Pawn != null)
@@ -336,7 +336,7 @@ public partial class GameWorld : Node
         LastPredictionSnapshot = latestSnapshot;
 
         var newTickId = GenerateTickId();
-        PredictionTicks.Add(new MarkedValue<Tick>(newTickId, currentTick));
+        PredictionTicks.Add(new MarkedValue<SoftTick>(newTickId, currentTick));
 
         // Collect player input
         var collectedCommands = PlayerController.Singleton.CollectCommands(newTickId);
