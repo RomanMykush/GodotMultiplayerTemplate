@@ -1,4 +1,3 @@
-using Godot;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -6,6 +5,8 @@ using System.Collections.Generic;
 namespace SteampunkDnD.Shared;
 
 public class BidirectionalDictionary<T, U> : IEnumerable<KeyValuePair<T, U>>
+    where T : notnull
+    where U : notnull
 {
     private readonly Dictionary<T, U> _forward = new();
     private readonly Dictionary<U, T> _reverse = new();
@@ -19,33 +20,33 @@ public class BidirectionalDictionary<T, U> : IEnumerable<KeyValuePair<T, U>>
         Reverse = new Indexer<U, T>(_reverse);
     }
 
-    public void Add(T t, U u)
+    public void Add(T firstKey, U secondKey)
     {
-        if (t == null)
-            throw new ArgumentNullException("Value cannot be null. (Parameter 'first key')");
-        if (u == null)
-            throw new ArgumentNullException("Value cannot be null. (Parameter 'second key')");
+        if (firstKey == null)
+            throw new ArgumentNullException(nameof(firstKey));
+        if (secondKey == null)
+            throw new ArgumentNullException(nameof(secondKey));
 
-        if (_forward.ContainsKey(t))
-            throw new ArgumentException($"An item with the same first key has already been added. First key: {t}");
-        if (_reverse.ContainsKey(u))
-            throw new ArgumentException($"An item with the same second key has already been added. Second key: {u}");
+        if (_forward.ContainsKey(firstKey))
+            throw new ArgumentException($"An item with the same first key has already been added. First key: {firstKey}");
+        if (_reverse.ContainsKey(secondKey))
+            throw new ArgumentException($"An item with the same second key has already been added. Second key: {secondKey}");
 
-        _forward.Add(t, u);
-        _reverse.Add(u, t);
+        _forward.Add(firstKey, secondKey);
+        _reverse.Add(secondKey, firstKey);
     }
 
-    public void RemoveByFirstKey(T t)
+    public void RemoveByFirstKey(T firstKey)
     {
-        U revKey = Forward[t];
-        _forward.Remove(t);
+        U revKey = Forward[firstKey];
+        _forward.Remove(firstKey);
         _reverse.Remove(revKey);
     }
 
-    public void RemoveBySecondKey(U u)
+    public void RemoveBySecondKey(U secondKey)
     {
-        T forwardKey = Reverse[u];
-        _reverse.Remove(u);
+        T forwardKey = Reverse[secondKey];
+        _reverse.Remove(secondKey);
         _forward.Remove(forwardKey);
     }
 
