@@ -1,6 +1,5 @@
 using Godot;
 using SteampunkDnD.Shared;
-using System;
 
 namespace SteampunkDnD.Server;
 
@@ -16,13 +15,14 @@ public partial class TickClock : Node
         // Subscribe to events
         Network.Singleton.MessageReceived += (peer, wrapper) =>
         {
-            switch (wrapper.Value) {
-            case Sync sync:
-                OnSyncReceived(peer, sync);
-                break;
-            case SyncInfoRequest decimalValue:
-                OnSyncInfoRequestReceived(peer);
-                break;
+            switch (wrapper.Value)
+            {
+                case Sync sync:
+                    OnSyncReceived(peer, sync);
+                    break;
+                case SyncInfoRequest decimalValue:
+                    OnSyncInfoRequestReceived(peer);
+                    break;
             }
         };
     }

@@ -1,8 +1,6 @@
-<Project Sdk="Godot.NET.Sdk/4.2.2">
+<Project Sdk="Godot.NET.Sdk/4.4.1-custom.1">
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
-    <TargetFramework Condition=" '$(GodotTargetPlatform)' == 'android' ">net7.0</TargetFramework>
-    <TargetFramework Condition=" '$(GodotTargetPlatform)' == 'ios' ">net8.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <EnableDynamicLoading>true</EnableDynamicLoading>
     <RootNamespace>SteampunkDnD</RootNamespace>
   </PropertyGroup>
@@ -10,7 +8,6 @@
     <PackageReference Include="GodotInputMapExtension" Version="0.1.4" />
     <PackageReference Include="MemoryPack" Version="1.21.1" />
   </ItemGroup>
-
   <ItemGroup>
     <AdditionalFiles Include="project.godot" />
   </ItemGroup>

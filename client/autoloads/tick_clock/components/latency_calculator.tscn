@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://ce8m4pun8lwla"]
 
-[ext_resource type="Script" path="res://client/autoloads/tick_clock/components/LatencyCalculator.cs" id="1_ket81"]
+[ext_resource type="Script" uid="uid://bm378dq6av0qx" path="res://client/autoloads/tick_clock/components/LatencyCalculator.cs" id="1_ket81"]
 
 [node name="LatencyCalculator" type="Node"]
 script = ExtResource("1_ket81")

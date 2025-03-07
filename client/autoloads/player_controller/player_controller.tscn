@@ -1,6 +1,6 @@
 [gd_scene load_steps=4 format=3 uid="uid://xkv6bjhat3q6"]
 
-[ext_resource type="Script" path="res://client/autoloads/player_controller/PlayerController.cs" id="1_awi5u"]
+[ext_resource type="Script" uid="uid://uvy0g0goyver" path="res://client/autoloads/player_controller/PlayerController.cs" id="1_awi5u"]
 [ext_resource type="PackedScene" uid="uid://dvq4wo63b8qio" path="res://client/autoloads/player_controller/components/key_input_translator.tscn" id="2_nk7he"]
 [ext_resource type="PackedScene" uid="uid://dvgxifilqpdsy" path="res://client/autoloads/player_controller/components/camera_container.tscn" id="2_oghat"]
 

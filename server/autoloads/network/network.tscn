@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://btuwwppjqosb8"]
 
-[ext_resource type="Script" path="res://server/autoloads/network/Network.cs" id="1_iktrk"]
+[ext_resource type="Script" uid="uid://c3qr8gxiqu1us" path="res://server/autoloads/network/Network.cs" id="1_iktrk"]
 
 [node name="Network" type="Node"]
 script = ExtResource("1_iktrk")

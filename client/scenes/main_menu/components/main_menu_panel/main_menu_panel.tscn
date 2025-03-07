@@ -1,6 +1,6 @@
 [gd_scene load_steps=14 format=3 uid="uid://shlqpy0l8nt5"]
 
-[ext_resource type="Script" path="res://client/scenes/main_menu/components/main_menu_panel/MainMenuPanel.cs" id="1_o2p4j"]
+[ext_resource type="Script" uid="uid://b6wo8l2pggjqh" path="res://client/scenes/main_menu/components/main_menu_panel/MainMenuPanel.cs" id="1_o2p4j"]
 [ext_resource type="PackedScene" uid="uid://2o0ewa233hyl" path="res://client/scenes/main_menu/components/main_menu_panel/components/host_game_menu.tscn" id="2_wtldl"]
 [ext_resource type="PackedScene" uid="uid://1eml3sfpp73e" path="res://client/scenes/main_menu/components/main_menu_panel/components/join_game_menu.tscn" id="3_vtww1"]
 
@@ -54,8 +54,8 @@ tracks/0/keys = {
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_yhftp"]
 _data = {
-"RESET": SubResource("Animation_tox0q"),
-"open_side_panel": SubResource("Animation_pa4ds")
+&"RESET": SubResource("Animation_tox0q"),
+&"open_side_panel": SubResource("Animation_pa4ds")
 }
 
 [sub_resource type="Animation" id="Animation_4fc7v"]
@@ -91,8 +91,8 @@ tracks/0/keys = {
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_8pem1"]
 _data = {
-"RESET": SubResource("Animation_4fc7v"),
-"show_content": SubResource("Animation_e0v7x")
+&"RESET": SubResource("Animation_4fc7v"),
+&"show_content": SubResource("Animation_e0v7x")
 }
 
 [node name="MainMenuPanel" type="MarginContainer"]

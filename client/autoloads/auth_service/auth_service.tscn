@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://copyokysldnna"]
 
-[ext_resource type="Script" path="res://client/autoloads/auth_service/AuthService.cs" id="1_cq4ie"]
+[ext_resource type="Script" uid="uid://bc02fk1y5juwj" path="res://client/autoloads/auth_service/AuthService.cs" id="1_cq4ie"]
 
 [node name="AuthService" type="Node"]
 script = ExtResource("1_cq4ie")

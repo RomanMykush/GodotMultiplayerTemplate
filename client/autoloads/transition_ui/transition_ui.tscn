@@ -1,6 +1,6 @@
 [gd_scene load_steps=10 format=3 uid="uid://fb77u8dpsgxv"]
 
-[ext_resource type="Script" path="res://client/autoloads/transition_ui/TransitionUi.cs" id="1_085bt"]
+[ext_resource type="Script" uid="uid://bk3nka08wekyo" path="res://client/autoloads/transition_ui/TransitionUi.cs" id="1_085bt"]
 [ext_resource type="PackedScene" uid="uid://dudan50jl10n8" path="res://client/autoloads/transition_ui/components/client_loading_bar.tscn" id="2_i3pnf"]
 [ext_resource type="PackedScene" uid="uid://csffqjmjb5tfg" path="res://client/autoloads/transition_ui/components/level_loading_bar.tscn" id="3_lswry"]
 
@@ -37,8 +37,8 @@ tracks/0/keys = {
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_dnmi2"]
 _data = {
-"RESET": SubResource("Animation_sdpad"),
-"fade_black": SubResource("Animation_gia7n")
+&"RESET": SubResource("Animation_sdpad"),
+&"fade_black": SubResource("Animation_gia7n")
 }
 
 [sub_resource type="Animation" id="Animation_rtoq0"]
@@ -59,6 +59,7 @@ tracks/0/keys = {
 [sub_resource type="Animation" id="Animation_43nwf"]
 resource_name = "slide_in_vertically"
 length = 0.75
+capture_included = true
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
@@ -74,8 +75,8 @@ tracks/0/keys = {
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_vkcwn"]
 _data = {
-"RESET": SubResource("Animation_rtoq0"),
-"slide_in_vertically": SubResource("Animation_43nwf")
+&"RESET": SubResource("Animation_rtoq0"),
+&"slide_in_vertically": SubResource("Animation_43nwf")
 }
 
 [node name="TransitionUi" type="Node"]

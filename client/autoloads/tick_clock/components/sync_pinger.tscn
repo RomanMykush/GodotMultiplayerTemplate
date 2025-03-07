@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://dpe4sh0on7j6d"]
 
-[ext_resource type="Script" path="res://client/autoloads/tick_clock/components/SyncPinger.cs" id="1_2d3lp"]
+[ext_resource type="Script" uid="uid://cdl1d2ygsiqjk" path="res://client/autoloads/tick_clock/components/SyncPinger.cs" id="1_2d3lp"]
 
 [node name="SyncPinger" type="Timer"]
 wait_time = 0.2

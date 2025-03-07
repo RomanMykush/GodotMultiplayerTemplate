@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://dvgxifilqpdsy"]
 
-[ext_resource type="Script" path="res://client/autoloads/player_controller/components/CameraContainer.cs" id="1_e8lcj"]
+[ext_resource type="Script" uid="uid://csg50g3ser2w2" path="res://client/autoloads/player_controller/components/CameraContainer.cs" id="1_e8lcj"]
 
 [node name="CameraContainer" type="Node3D"]
 script = ExtResource("1_e8lcj")

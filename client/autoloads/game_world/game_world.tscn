@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://olusoj3cjkhh"]
 
-[ext_resource type="Script" path="res://client/autoloads/game_world/GameWorld.cs" id="1_sexhf"]
+[ext_resource type="Script" uid="uid://mx61rgf1yy8e" path="res://client/autoloads/game_world/GameWorld.cs" id="1_sexhf"]
 [ext_resource type="PackedScene" uid="uid://d27x30s2onjeu" path="res://shared/scenes/entity_container/entity_container.tscn" id="1_y73bi"]
 
 [node name="GameWorld" type="Node"]

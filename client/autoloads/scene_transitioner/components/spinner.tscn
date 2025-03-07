@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3 uid="uid://pxjmeefnyx8p"]
 
 [ext_resource type="Texture2D" uid="uid://c8et7emqn2ec3" path="res://client/autoloads/scene_transitioner/components/circle.svg" id="1_e3ham"]
-[ext_resource type="Script" path="res://client/autoloads/scene_transitioner/components/Spinner.cs" id="1_pt7pf"]
+[ext_resource type="Script" uid="uid://c75bktkcj1hns" path="res://client/autoloads/scene_transitioner/components/Spinner.cs" id="1_pt7pf"]
 
 [node name="Spinner" type="TextureProgressBar"]
 offset_right = 60.0

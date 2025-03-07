@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://cvk8sdy0i6il"]
 
-[ext_resource type="Script" path="res://shared/autoloads/job_host/JobHost.cs" id="1_o44v0"]
+[ext_resource type="Script" uid="uid://bmjbr3yhcv0ik" path="res://shared/autoloads/job_host/JobHost.cs" id="1_o44v0"]
 
 [node name="JobHost" type="Node"]
 script = ExtResource("1_o44v0")

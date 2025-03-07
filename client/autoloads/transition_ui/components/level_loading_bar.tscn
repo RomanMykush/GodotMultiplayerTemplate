@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://csffqjmjb5tfg"]
 
-[ext_resource type="Script" path="res://client/autoloads/transition_ui/components/LevelLoadingBar.cs" id="1_2fhc4"]
+[ext_resource type="Script" uid="uid://berso45w21hxu" path="res://client/autoloads/transition_ui/components/LevelLoadingBar.cs" id="1_2fhc4"]
 
 [node name="LevelLoadingBar" type="HBoxContainer"]
 anchors_preset = 15

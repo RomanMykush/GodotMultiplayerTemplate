@@ -1,6 +1,6 @@
 [gd_scene load_steps=3 format=3 uid="uid://cwql1ah83m1d8"]
 
-[ext_resource type="Script" path="res://client/autoloads/notification_box/NotificationBox.cs" id="1_pq7k6"]
+[ext_resource type="Script" uid="uid://cjm7rkbyo8shy" path="res://client/autoloads/notification_box/NotificationBox.cs" id="1_pq7k6"]
 [ext_resource type="PackedScene" uid="uid://cr5cdr7mtwju6" path="res://client/autoloads/notification_box/components/notification_panel.tscn" id="2_1xwq4"]
 
 [node name="NotificationBox" type="Node"]

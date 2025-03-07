@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://bcl2627npo3o1"]
 
-[ext_resource type="Script" path="res://server/autoloads/tick_clock/TickClock.cs" id="1_ffmfe"]
+[ext_resource type="Script" uid="uid://dclf1k1nimn3w" path="res://server/autoloads/tick_clock/TickClock.cs" id="1_ffmfe"]
 
 [node name="TickClock" type="Node"]
 script = ExtResource("1_ffmfe")

@@ -1,6 +1,6 @@
 [gd_scene load_steps=6 format=3 uid="uid://bwu3gxq7k85xr"]
 
-[ext_resource type="Script" path="res://client/autoloads/scene_transitioner/SceneTransitioner.cs" id="1_7opo2"]
+[ext_resource type="Script" uid="uid://cy3dvndky6l1t" path="res://client/autoloads/scene_transitioner/SceneTransitioner.cs" id="1_7opo2"]
 [ext_resource type="PackedScene" uid="uid://vrj2bdapqnaw" path="res://client/autoloads/scene_transitioner/components/waiting_panel.tscn" id="2_cvuxk"]
 
 [sub_resource type="Animation" id="Animation_ymwsg"]
@@ -36,8 +36,8 @@ tracks/0/keys = {
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_jbjna"]
 _data = {
-"RESET": SubResource("Animation_ymwsg"),
-"show_waiting_panel": SubResource("Animation_pboss")
+&"RESET": SubResource("Animation_ymwsg"),
+&"show_waiting_panel": SubResource("Animation_pboss")
 }
 
 [node name="SceneTransitioner" type="Node"]

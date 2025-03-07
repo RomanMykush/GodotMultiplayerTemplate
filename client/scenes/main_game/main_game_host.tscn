@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3 uid="uid://coo0c1j8nnx73"]
 
 [ext_resource type="PackedScene" uid="uid://di11p6slhflx2" path="res://client/scenes/main_game/main_game_client.tscn" id="1_j3epp"]
-[ext_resource type="Script" path="res://client/scenes/main_game/MainGameHost.cs" id="2_v5sq8"]
+[ext_resource type="Script" uid="uid://blax7qq6b786m" path="res://client/scenes/main_game/MainGameHost.cs" id="2_v5sq8"]
 
 [node name="MainGameHost" instance=ExtResource("1_j3epp")]
 script = ExtResource("2_v5sq8")

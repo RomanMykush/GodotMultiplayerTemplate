@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://cr5cdr7mtwju6"]
 
-[ext_resource type="Script" path="res://client/autoloads/notification_box/components/NotificationPanel.cs" id="1_mu46v"]
+[ext_resource type="Script" uid="uid://mkg8o5jim3lc" path="res://client/autoloads/notification_box/components/NotificationPanel.cs" id="1_mu46v"]
 
 [node name="NotificationPanel" type="PanelContainer"]
 custom_minimum_size = Vector2(300, 150)
