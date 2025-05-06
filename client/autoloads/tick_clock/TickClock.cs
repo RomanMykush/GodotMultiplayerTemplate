@@ -31,6 +31,7 @@ public partial class TickClock : Node, IInitializable
     private float Jitter => 3 * LatencyStd; // Set jitter as 99.7% of distribution (or 3 standart deviations)
     private readonly Stopwatch TickUpdateStopwatch = new();
     private float PhysicsProcessDelta;
+    private float PreviousBuffer;
 
     public override void _Ready()
     {
@@ -74,7 +75,7 @@ public partial class TickClock : Node, IInitializable
             TickUpdateStopwatch.Start();
         };
 
-        return new List<JobInfo>() { new(combinedJobs) };
+        return [new(combinedJobs)];
     }
 
     private SoftTick UpdateServerTick()
@@ -109,9 +110,10 @@ public partial class TickClock : Node, IInitializable
         var extrapolationTick = serverTick.AddDuration(-buffer);
         var predictionTick = serverTick.AddDuration(buffer);
 
-        EmitSignal(SignalName.ExtrapolationTickUpdated, new GodotWrapper<SoftTick>(extrapolationTick), PhysicsProcessDelta);
-        EmitSignal(SignalName.PredictionTickUpdated, new GodotWrapper<SoftTick>(predictionTick), PhysicsProcessDelta);
+        EmitSignal(SignalName.ExtrapolationTickUpdated, new GodotWrapper<SoftTick>(extrapolationTick), PhysicsProcessDelta - buffer + PreviousBuffer);
+        EmitSignal(SignalName.PredictionTickUpdated, new GodotWrapper<SoftTick>(predictionTick), PhysicsProcessDelta + buffer - PreviousBuffer);
         PhysicsProcessDelta = 0;
+        PreviousBuffer = buffer;
     }
 
     private void OnLatencyCalculated(float avarage, float std)
