@@ -348,9 +348,9 @@ public partial class GameWorld : Node
         // Generating pending commands
         var pendingCommands = DivideByServerTicks(PredictionTicks, PredictionTickDeltas)
             .Where(kv => kv.Key > latestSnapshot.Tick && kv.Key < currentTick.TickCount + 1) // TODO: Can be optimized
-            .Select(kv => new KeyValuePair<uint, IEnumerable<(uint id, float delta, IEnumerable<ICommand> commands)>>(
+            .Select(kv => new KeyValuePair<uint, IEnumerable<(float delta, IEnumerable<ICommand> commands)>>(
                 kv.Key, kv.Value.Select(t => PlayerController.Singleton.TryGetCommands(t.id, out var commands)
-                    ? (t.id, t.delta, commands) : (t.id, t.delta, emptyCommands)))) // Check if commands exists
+                    ? (t.delta, commands) : (t.delta, emptyCommands)))) // Check if commands exists
             .Select(kv => new CommandSnapshot(kv.Key, CommandUtils.MergeCommands(kv.Value, currentTick.TickInterval)));
 
         // Send all unprocessed by server commands

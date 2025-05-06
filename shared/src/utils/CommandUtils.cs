@@ -6,35 +6,28 @@ namespace SteampunkDnD.Shared;
 
 public static class CommandUtils
 {
-    public static IEnumerable<ICommand> MergeCommands(IEnumerable<(uint priority, float weight, IEnumerable<ICommand> commands)> inputCommands, float totalWeight)
+    public static IEnumerable<ICommand> MergeCommands(IEnumerable<(float weight, IEnumerable<ICommand> commands)> inputCommands, float totalWeight)
     {
         // Dictionaries for different methods of merging
-        var bestOnes = new Dictionary<Type, (uint priority, ICommand command)>();
         var accumulateOnes = new Dictionary<Type, List<(float weight, ICommand command)>>();
-        var anyOnes = new Dictionary<Type, ICommand>();
+        var lastOnes = new Dictionary<Type, ICommand>();
         var allOnes = new List<ICommand>();
 
         // Iterate over commands types
-        foreach (var (priority, weight, commands) in inputCommands)
+        foreach (var (weight, commands) in inputCommands)
         {
             foreach (var cmd in commands)
             {
                 switch (cmd)
                 {
-                    case LookAtCommand: // Find most important one
-                        if (bestOnes.ContainsKey(typeof(LookAtCommand)))
-                        {
-                            var previous = bestOnes[typeof(LookAtCommand)];
-                            if (previous.priority > priority)
-                                break;
-                        }
-                        bestOnes[typeof(LookAtCommand)] = (priority, cmd);
+                    case LookAtCommand: // Set last one
+                        lastOnes[typeof(LookAtCommand)] = cmd;
                         break;
                     case MoveCommand: // Accumulate
                         accumulateOnes.AppendItemToList(typeof(MoveCommand), (weight, cmd));
                         break;
-                    case JumpCommand: // Set any
-                        anyOnes[typeof(JumpCommand)] = cmd;
+                    case JumpCommand: // Set last one
+                        lastOnes[typeof(JumpCommand)] = cmd;
                         break;
                     case AttackCommand: // Accumulate
                         accumulateOnes.AppendItemToList(typeof(AttackCommand), (weight, cmd));
@@ -47,9 +40,8 @@ public static class CommandUtils
                 }
             }
         }
-        var mergedCommands = new List<ICommand>();
-        mergedCommands.AddRange(bestOnes.Select(d => d.Value.command));
-        mergedCommands.AddRange(anyOnes.Select(d => d.Value));
+        var mergedCommands = new List<ICommand>(lastOnes.Count + allOnes.Count + accumulateOnes.Count);
+        mergedCommands.AddRange(lastOnes.Select(d => d.Value));
         mergedCommands.AddRange(allOnes);
 
         // Merge accumulated commands
