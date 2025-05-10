@@ -5,22 +5,23 @@ using System.Linq;
 
 namespace SteampunkDnD.Shared;
 
-public partial class Character : CharacterBody3D, ISpatial, IControlable
+public partial class Character : CustomCharacterBody3D, ISpatial, IControlable
 {
     [Signal] public delegate void ViewUpdatedEventHandler(Vector3 viewPosition);
 
     public Node3D ViewPoint { get; private set; }
 
     [Export] public string Kind { get; private set; }
-    [Export(PropertyHint.Range, "0,90,")] public float ViewAngleСonstraint { get; private set; } = 85;
+    [Export(PropertyHint.Range, "0,90,")] public float ViewAngleConstraint { get; private set; } = 85;
 
     public uint EntityId { get; private set; }
-    private IEnumerable<ICommand> LastInputs = new List<ICommand>();
+    private IEnumerable<ICommand> LastInputs = [];
 
     // TODO: Put those properties in a separate physics logic components
-    [Export] public float Gravity { get; private set; }
-    [Export] public float JumpVelocity { get; private set; }
-    [Export] public float Speed { get; private set; }
+    [Export] public float Gravity { get; private set; } = 10;
+    [Export] public float JumpVelocity { get; private set; } = 10;
+    [Export] public float WalkingSpeed { get; private set; } = 10;
+    [Export] public float WalkingStrength { get; private set; } = 60;
 
     public void LoadChildren()
     {
@@ -50,7 +51,7 @@ public partial class Character : CharacterBody3D, ISpatial, IControlable
             .SignedAngleTo(direction, ViewPoint.GetGlobalRight());
 
         float viewRotation = Mathf.Clamp(ViewPoint.Rotation.X + angleTo,
-            Mathf.DegToRad(-ViewAngleСonstraint), Mathf.DegToRad(ViewAngleСonstraint));
+            Mathf.DegToRad(-ViewAngleConstraint), Mathf.DegToRad(ViewAngleConstraint));
         ViewPoint.Rotation = new Vector3(viewRotation, 0, 0);
 
         EmitSignal(SignalName.ViewUpdated, ViewPoint.GlobalPosition);
@@ -64,41 +65,39 @@ public partial class Character : CharacterBody3D, ISpatial, IControlable
 
     private Vector3 CalculateVelocity(double delta)
     {
+        float floatDelta = (float)delta;
         // TODO: Refactor this to allow other movement and physics types
         Vector3 resultVelocity = Velocity;
 
-        if (!IsOnFloor())
-            resultVelocity.Y -= Gravity * (float)delta;
+        bool onFloorIfSnapped = OnFloorIfSnapped();
+        if (!onFloorIfSnapped)
+            resultVelocity.Y -= Gravity * floatDelta;
 
-        if (LastInputs.Any(c => c is JumpCommand) && IsOnFloor())
+        if (LastInputs.Any(c => c is JumpCommand) && onFloorIfSnapped)
             resultVelocity.Y += JumpVelocity;
 
         var moveCommand = LastInputs.FirstOrDefault(c => c is MoveCommand) as MoveCommand;
         var inputDir = moveCommand != null ? moveCommand.Direction : Vector2.Zero;
         var direction = new Vector3(inputDir.X, 0, inputDir.Y);
 
-        if (inputDir != Vector2.Zero)
-        {
-            resultVelocity.X = direction.X * Speed;
-            resultVelocity.Z = direction.Z * Speed;
-        }
-        else
-        {
-            resultVelocity.X = 0;
-            resultVelocity.Z = 0;
-        }
+        var targetWalkingVelocity = direction * WalkingSpeed;
+        var counteringVelocityDelta = targetWalkingVelocity - resultVelocity;
+        counteringVelocityDelta.Y = 0;
+        if (WalkingStrength * WalkingStrength * floatDelta * floatDelta > counteringVelocityDelta.LengthSquared())
+            resultVelocity = targetWalkingVelocity with { Y = resultVelocity.Y };
+        else resultVelocity += counteringVelocityDelta.Normalized() * WalkingStrength * floatDelta;
 
         return resultVelocity;
     }
 
-    private void AdvancePhysics()
+    private void AdvancePhysics(double delta)
     {
         // Rotate character toward view target
         var lookCommand = LastInputs.FirstOrDefault(c => c is LookAtCommand) as LookAtCommand;
         if (lookCommand != null)
             UpdateViewPoint(ViewPoint.GlobalPosition.DirectionTo(lookCommand.Target));
 
-        MoveAndSlide();
+        Move(delta);
 
         // Get all continuous inputs and mark them as not started recenty
         LastInputs = LastInputs.OfType<ContiniousCommand>()
@@ -108,20 +107,13 @@ public partial class Character : CharacterBody3D, ISpatial, IControlable
     public override void _PhysicsProcess(double delta)
     {
         Velocity = CalculateVelocity(delta);
-        AdvancePhysics();
+        AdvancePhysics(delta);
     }
 
     public void ManualPhysicsProcess(double delta)
     {
         Velocity = CalculateVelocity(delta);
-
-        // TODO: Change after this PR gets merged: https://github.com/godotengine/godot/pull/76462 
-        // Apply workaround from https://github.com/godotengine/godot-proposals/issues/2821#issuecomment-854081858
-        double defaultDelta = Engine.IsInPhysicsFrame() ? GetPhysicsProcessDeltaTime() : GetProcessDeltaTime();
-        float timeFactor = (float)(delta / defaultDelta);
-        Velocity *= timeFactor;
-        AdvancePhysics();
-        Velocity /= timeFactor;
+        AdvancePhysics(delta);
     }
 
     public EntityState GetState() => new CharacterState(EntityId, Kind, Position, Rotation, ViewPoint.Rotation.X, Velocity);

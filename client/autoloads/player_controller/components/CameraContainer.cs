@@ -58,7 +58,7 @@ public partial class CameraContainer : Node3D, ICommandSource
         if (@event is InputEventMouseMotion mouseMoveEvent)
         {
             float cameraRotation = Mathf.Clamp(MainCamera.Rotation.X - mouseMoveEvent.Relative.Y * Sensitivity,
-                Mathf.DegToRad(-Pawn.ViewAngleСonstraint), Mathf.DegToRad(Pawn.ViewAngleСonstraint));
+                Mathf.DegToRad(-Pawn.ViewAngleConstraint), Mathf.DegToRad(Pawn.ViewAngleConstraint));
             MainCamera.Rotation = new Vector3(cameraRotation, 0, 0);
             RotateY(-mouseMoveEvent.Relative.X * Sensitivity);
 
