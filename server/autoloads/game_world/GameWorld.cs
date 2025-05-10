@@ -13,7 +13,7 @@ public partial class GameWorld : Node
 
     private EntityContainer Entities;
 
-    public readonly List<CharacterController> Controllers = new();
+    public readonly List<CharacterController> Controllers = [];
 
     public override void _Ready()
     {
@@ -65,17 +65,18 @@ public partial class GameWorld : Node
         }
     }
 
-    private void OnTickUpdated(uint currentTick, float tickTimeDelta)
+    private void OnTickUpdated(uint currentTick)
     {
         // Process character controllers
         foreach (var controller in Controllers)
             controller.ApplyCommands(currentTick);
 
         // Process entities
+        float delta = 1f / Engine.PhysicsTicksPerSecond;
         foreach (var entity in Entities.GetAll())
         {
             var node = entity as Node;
-            node._PhysicsProcess(tickTimeDelta);
+            node._PhysicsProcess(delta);
         }
 
         // Generate snapshot

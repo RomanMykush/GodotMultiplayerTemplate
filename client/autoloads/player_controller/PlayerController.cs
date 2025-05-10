@@ -8,7 +8,7 @@ public partial class PlayerController : Node
 {
     public static PlayerController Singleton { get; private set; }
 
-    private readonly List<ICommandSource> CommandSources = new();
+    private readonly List<ICommandSource> CommandSources = [];
 
     private Character _pawn;
     public Character Pawn
@@ -28,7 +28,7 @@ public partial class PlayerController : Node
     /// <summary>
     /// Dictionary of <c>SoftTick</c> ids with corresponding <c>Command</c>s.
     /// </summary>
-    private readonly Dictionary<uint, IEnumerable<ICommand>> BufferedCommands = new();
+    private readonly Dictionary<uint, IEnumerable<ICommand>> BufferedCommands = [];
 
     public override void _Ready()
     {
@@ -57,9 +57,9 @@ public partial class PlayerController : Node
         return commands;
     }
 
-    public bool TryGetCommands(uint tickId, out IEnumerable<ICommand> result) =>
-        BufferedCommands.TryGetValue(tickId, out result);
+    public bool TryGetCommands(uint tick, out IEnumerable<ICommand> result) =>
+        BufferedCommands.TryGetValue(tick, out result);
 
-    public bool RemoveCommands(uint tickId) =>
-        BufferedCommands.Remove(tickId);
+    public bool RemoveCommands(uint tick) =>
+        BufferedCommands.Remove(tick);
 }

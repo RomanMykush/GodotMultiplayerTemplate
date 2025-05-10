@@ -1,6 +1,5 @@
 using Godot;
 using SteampunkDnD.Shared;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -66,7 +65,7 @@ public partial class LatencyCalculator : Node, IInitializable
             };
         };
 
-        return new List<JobInfo>() { new(combinedJobs) };
+        return [new(combinedJobs)];
     }
 
     private void OnSyncReceived(Sync sync)

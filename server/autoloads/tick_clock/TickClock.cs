@@ -6,7 +6,7 @@ namespace SteampunkDnD.Server;
 public partial class TickClock : Node
 {
     public static TickClock Singleton { get; private set; }
-    [Signal] public delegate void TickUpdatedEventHandler(uint currentTick, float tickTimeDelta);
+    [Signal] public delegate void TickUpdatedEventHandler(uint currentTick);
     public uint CurrentTick { get; private set; }
 
     public override void _Ready()
@@ -27,10 +27,10 @@ public partial class TickClock : Node
         };
     }
 
-    public override void _PhysicsProcess(double delta)
+    public override void _PhysicsProcess(double _)
     {
         CurrentTick++;
-        EmitSignal(SignalName.TickUpdated, CurrentTick, (float)delta);
+        EmitSignal(SignalName.TickUpdated, CurrentTick);
     }
 
     private void OnSyncReceived(int peer, Sync sync)

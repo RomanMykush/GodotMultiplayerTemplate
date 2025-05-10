@@ -13,10 +13,10 @@ public partial class GameWorld : Node
     private EntityContainer Container;
 
     private readonly SortedSet<StateSnapshot> Snapshots = new(new StateSnapshotTickComparer());
-    private StateSnapshot LastInterpolationSnapshot = new(0, new List<EntityState>(), new List<IMeta>());
-    private StateSnapshot LastPredictionSnapshot = new(0, new List<EntityState>(), new List<IMeta>());
-    private List<MarkedValue<SoftTick>> PredictionTicks = new(); // sorted list of prediction ticks with their ids
-    private readonly Dictionary<uint, float> PredictionTickDeltas = new(); // dictionary of tick ids with their physics delta times
+    private StateSnapshot LastInterpolationSnapshot = new(0, [], []);
+    private uint LastInterpolationTick;
+    private StateSnapshot LastPredictionSnapshot = new(0, [], []);
+    private List<uint> PredictionTicks = [];
     private readonly EntityStateIdComparer EntityComparer = new();
 
     public override void _Ready()
@@ -74,33 +74,53 @@ public partial class GameWorld : Node
         Snapshots.Add(first);
     }
 
-    private void OnInterpolationTickUpdated(GodotWrapper<SoftTick> wrapper)
+    private IEnumerable<EntityState> GetInterpolatedPresentStates(uint currentTick)
     {
-        var tick = wrapper.Value;
-        DeleteOldSnapshots(tick.TickCount);
-
-        // Check if at least 2 snapshots exist
-        if (Snapshots.Count < 2)
-            return;
         var pastSnapshot = Snapshots.Min;
-        if (pastSnapshot.Tick > tick.TickCount)
-            return;
+        if (pastSnapshot.Tick == currentTick)
+            return pastSnapshot.States;
 
-        // Get future snapshot
+        // Get next to past snapshot
         StateSnapshot futureSnapshot = null;
         foreach (var snapshot in Snapshots.Skip(1))
         {
-            if (snapshot.Tick > tick.TickCount)
+            if (snapshot.Tick > currentTick)
             {
                 futureSnapshot = snapshot;
                 break;
             }
             pastSnapshot = snapshot;
         }
+        // Check if any future snapshots exist
+        if (futureSnapshot == null)
+            return null;
 
-        // Spawn and despawn entities if this is new snapshot object
+        // Get interpolation theta between past and future snapshots
+        float theta = (currentTick - pastSnapshot.Tick) / (futureSnapshot.Tick - pastSnapshot.Tick);
+
+        // Interpolate states
+        // TODO: Add a check for equality of past and future snapshots state types in case a malicious server sends different types, what can cause a crash
+        return pastSnapshot.States.Join(futureSnapshot.States, p => p.EntityId,
+            f => f.EntityId, (p, f) => p.Interpolate(f, theta));
+    }
+
+    private void OnInterpolationTickUpdated(uint currentTick)
+    {
+        DeleteOldSnapshots(currentTick);
+
+        // Check if at least 2 snapshots exist
+        if (Snapshots.Count < 2)
+            return;
+        var pastSnapshot = Snapshots.Min;
+        if (pastSnapshot.Tick > currentTick)
+            return;
+
+        if (LastInterpolationTick == currentTick)
+            return;
+
         if (LastInterpolationSnapshot != pastSnapshot)
         {
+            // Spawn and despawn entities if this is new snapshot object
             // Despawn old ones
             var despawnOnes = LastInterpolationSnapshot.States.Except(pastSnapshot.States, EntityComparer);
             foreach (var item in despawnOnes)
@@ -119,35 +139,9 @@ public partial class GameWorld : Node
                 {
                     Logger.Singleton.Log(LogLevel.Error, e.Message);
                 }
-            }
-        }
-
-        // Check if any future snapshots exist
-        if (futureSnapshot == null)
-            return;
-
-        // Get interpolation theta between past and future snapshots
-        float snapshotsDeltaTick = futureSnapshot.Tick - pastSnapshot.Tick;
-        float presentDeltaTick = tick.TickCount - pastSnapshot.Tick;
-        float theta = (presentDeltaTick + tick.TickDuration * tick.TickRate) / snapshotsDeltaTick;
-
-        // Interpolate states
-        // TODO: Add a check for equality of past and future snapshots state types in case a malicious server sends different types, what can cause a crash
-        var presentSnapshot = pastSnapshot.States.Join(futureSnapshot.States, p => p.EntityId,
-            f => f.EntityId, (p, f) => p.Interpolate(f, theta));
-
-        // Apply interpolated state
-        foreach (var state in presentSnapshot)
-        {
-            var entity = Container.Get(state.EntityId);
-            if (entity == PlayerController.Singleton.Pawn)
-                continue;
-            entity.ApplyState(state);
         }
 
         // Process metadata
-        if (LastInterpolationSnapshot != pastSnapshot)
-        {
             foreach (var meta in pastSnapshot.MetaData)
             {
                 switch (meta)
@@ -171,30 +165,26 @@ public partial class GameWorld : Node
             }
         }
         LastInterpolationSnapshot = pastSnapshot;
+
+        var presentStates = GetInterpolatedPresentStates(currentTick);
+        if (presentStates == null)
+            return;
+        LastInterpolationTick = currentTick;
+
+        // Apply interpolated state
+        foreach (var state in presentStates)
+        {
+            var entity = Container.Get(state.EntityId);
+            if (entity == PlayerController.Singleton.Pawn)
+                continue;
+            entity.ApplyState(state);
+        }
     }
 
-    private void OnExtrapolationTickUpdated(GodotWrapper<SoftTick> wrapper, float tickDelta)
+    private void OnExtrapolationTickUpdated(uint currentTick)
     {
         // TODO: Implement this
         // Run if there left only one old snapshot
-    }
-
-    private void CheckTickRateChange(SoftTick newTick)
-    {
-        if (PredictionTicks.Count < 1)
-            return;
-
-        var originalTickRate = PredictionTicks.First().Value.TickRate;
-        if (originalTickRate != newTick.TickRate)
-        {
-            // TODO: Implement commands translation into new tick rate
-            Logger.Singleton.Log(LogLevel.Warning, "New tickrate detected. Removing all commands");
-
-            // TEMP solution: Remove all commands and deltas
-            foreach (var invalidTick in PredictionTicks)
-                PlayerController.Singleton.RemoveCommands(invalidTick.Id);
-            PredictionTickDeltas.Clear();
-        }
     }
 
     private void ApplyPrediction(uint snapshotTick, EntityState initialState, Character pawn, PlayerController controller)
@@ -203,126 +193,60 @@ public partial class GameWorld : Node
             return;
         pawn.ApplyState(initialState);
 
-        var relevantTicks = PredictionTicks.Where(m => m.Value.TickCount >= snapshotTick);
+        var relevantTicks = PredictionTicks.Where(t => t > snapshotTick);
         if (!relevantTicks.Any())
             return;
 
-        // Rewind simulation for first prediction tick after snapshot
-        var firstTick = relevantTicks.First();
-        if (controller.TryGetCommands(firstTick.Id, out var commands))
-            pawn.ReceiveCommands(commands);
-
-        float delta = Math.Min(firstTick.Value.TickDuration, PredictionTickDeltas[firstTick.Id]);
-        pawn.ManualProcess(delta);
-        pawn.ManualPhysicsProcess(delta);
-
         // Rewind simulation for rest of ticks
-        foreach (var markedTick in relevantTicks.Skip(1))
+        float delta = 1f / Engine.PhysicsTicksPerSecond;
+        foreach (var tick in relevantTicks)
         {
-            if (controller.TryGetCommands(markedTick.Id, out commands))
+            if (controller.TryGetCommands(tick, out var commands))
                 pawn.ReceiveCommands(commands);
 
             // Simulate character
-            delta = PredictionTickDeltas[markedTick.Id];
             pawn.ManualProcess(delta);
             pawn.ManualPhysicsProcess(delta);
         }
     }
 
-    private uint GenerateTickId()
-    {
-        uint current = (uint)Random.Shared.Next();
-        while (PredictionTicks.Any(k => k.Id == current))
-            current++;
-        return current;
-    }
-
-    private static Dictionary<uint, List<(uint id, SoftTick tick, float delta)>> DivideByServerTicks(List<MarkedValue<SoftTick>> clientTicks, Dictionary<uint, float> clientTickDeltas)
-    {
-        var splitedClientTicks = new Dictionary<uint, List<(uint id, SoftTick tick, float delta)>>();
-        foreach (var (id, tick) in clientTicks)
-        {
-            float delta = clientTickDeltas[id];
-            var leftSideTick = tick.AddDuration(-delta);
-            // Check if first client tick is fully inside single server tick
-            if (leftSideTick.TickCount == tick.TickCount)
-            {
-                splitedClientTicks.AppendItemToList(tick.TickCount + 1, (id, tick, delta));
-                continue;
-            }
-
-            // Add first part of tick
-            float firstTickDelta = tick.TickInterval - leftSideTick.TickDuration;
-            splitedClientTicks.AppendItemToList(leftSideTick.TickCount + 1,
-                (id, new SoftTick(tick.TickRate) { TickCount = leftSideTick.TickCount + 1 }, firstTickDelta));
-
-            // Add remaining parts
-            float durationRemnants = delta - firstTickDelta;
-            uint currentServerTick = leftSideTick.TickCount + 1;
-            while (true)
-            {
-                if (durationRemnants > tick.TickInterval)
-                {
-                    currentServerTick++;
-                    splitedClientTicks.AppendItemToList(currentServerTick,
-                        (id, new SoftTick(tick.TickRate) { TickCount = currentServerTick }, tick.TickInterval));
-                    durationRemnants -= tick.TickInterval;
-                    continue;
-                }
-                // Add last part
-                splitedClientTicks.AppendItemToList(currentServerTick + 1, (id, tick, tick.TickDuration));
-                break;
-            }
-        }
-        return splitedClientTicks;
-    }
-
-    private void OnPredictionTickUpdated(GodotWrapper<SoftTick> wrapper, float tickDelta)
+    private void OnPredictionTickUpdated(uint currentTick)
     {
         if (Snapshots.Count < 1)
             return;
-        var currentTick = wrapper.Value;
-
-        CheckTickRateChange(currentTick);
 
         // Check if next prediction tick is less then previous one(s)
-        int index = PredictionTicks.FindIndex((v) => v.Value >= currentTick);
+        int index = PredictionTicks.FindIndex((t) => t >= currentTick);
         if (index != -1)
         {
             Logger.Singleton.Log(LogLevel.Warning, "New prediction tick is less then previous one(s). Removing commands associated with newer ticks");
 
-            // Extract all newer tick ids
-            var invalidMarkedTicks = PredictionTicks
+            // Extract all invalid ticks
+            var invalidTicks = PredictionTicks
                 .GetRange(index, PredictionTicks.Count - index);
-            // Leave all other ones
+            // Leave all relevant ticks
             PredictionTicks = PredictionTicks.GetRange(0, index);
-            // Remove old commands and deltas
-            foreach (var markedTick in invalidMarkedTicks)
-            {
-                PlayerController.Singleton.RemoveCommands(markedTick.Id);
-                PredictionTickDeltas.Remove(markedTick.Id);
-            }
+            // Remove old commands
+            foreach (var tick in invalidTicks)
+                PlayerController.Singleton.RemoveCommands(tick);
         }
 
         // Check if there is new latest snapshot
         var latestSnapshot = Snapshots.Max;
         if (LastPredictionSnapshot != latestSnapshot)
         {
-            // Get index of last outdated tick
-            index = PredictionTicks.FindLastIndex((v) => v.Value.TickCount < latestSnapshot.Tick);
+            // Get last outdated tick
+            index = PredictionTicks.FindLastIndex((t) => t <= latestSnapshot.Tick);
             if (index != -1)
             {
                 // Extract all outdated ticks
-                var oldMarkedTicks = PredictionTicks.GetRange(0, index + 1);
+                var oldTicks = PredictionTicks.GetRange(0, index + 1);
                 // Leave all relevant ticks
                 PredictionTicks = PredictionTicks
                     .GetRange(index + 1, PredictionTicks.Count - (index + 1));
                 // Remove old commands and deltas
-                foreach (var markedTick in oldMarkedTicks)
-                {
-                    PlayerController.Singleton.RemoveCommands(markedTick.Id);
-                    PredictionTickDeltas.Remove(markedTick.Id);
-                }
+                foreach (var tick in oldTicks)
+                    PlayerController.Singleton.RemoveCommands(tick);
             }
 
             if (PlayerController.Singleton.Pawn != null)
@@ -335,23 +259,16 @@ public partial class GameWorld : Node
         }
         LastPredictionSnapshot = latestSnapshot;
 
-        var newTickId = GenerateTickId();
-        PredictionTicks.Add(new MarkedValue<SoftTick>(newTickId, currentTick));
+        PredictionTicks.Add(currentTick);
 
         // Collect player input
-        var collectedCommands = PlayerController.Singleton.CollectCommands(newTickId);
-        PredictionTickDeltas.Add(newTickId, tickDelta);
-
-        // Create placeholder data to avoid unnecessary allocations
-        var emptyCommands = new List<ICommand>();
+        var collectedCommands = PlayerController.Singleton.CollectCommands(currentTick);
 
         // Generating pending commands
-        var pendingCommands = DivideByServerTicks(PredictionTicks, PredictionTickDeltas)
-            .Where(kv => kv.Key > latestSnapshot.Tick && kv.Key < currentTick.TickCount + 1) // TODO: Can be optimized
-            .Select(kv => new KeyValuePair<uint, IEnumerable<(float delta, IEnumerable<ICommand> commands)>>(
-                kv.Key, kv.Value.Select(t => PlayerController.Singleton.TryGetCommands(t.id, out var commands)
-                    ? (t.delta, commands) : (t.delta, emptyCommands)))) // Check if commands exists
-            .Select(kv => new CommandSnapshot(kv.Key, CommandUtils.MergeCommands(kv.Value, currentTick.TickInterval)));
+        var pendingCommands = new List<CommandSnapshot>(PredictionTicks.Count);
+        foreach (var tick in PredictionTicks)
+            if (PlayerController.Singleton.TryGetCommands(tick, out var commands))
+                pendingCommands.Add(new CommandSnapshot(tick, commands));
 
         // Send all unprocessed by server commands
         var recentCommands = new RecentCommandSnapshots(pendingCommands);
@@ -361,7 +278,8 @@ public partial class GameWorld : Node
         if (PlayerController.Singleton.Pawn != null)
         {
             PlayerController.Singleton.Pawn.ReceiveCommands(collectedCommands);
-            PlayerController.Singleton.Pawn.ManualPhysicsProcess(tickDelta);
+            float delta = 1f / Engine.PhysicsTicksPerSecond;
+            PlayerController.Singleton.Pawn.ManualPhysicsProcess(delta);
         }
     }
 }

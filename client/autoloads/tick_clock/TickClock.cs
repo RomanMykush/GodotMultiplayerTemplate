@@ -1,7 +1,6 @@
 using Godot;
 using SteampunkDnD.Shared;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 
 namespace SteampunkDnD.Client;
@@ -11,9 +10,9 @@ public partial class TickClock : Node, IInitializable
     public static TickClock Singleton { get; private set; }
 
     // Signals
-    [Signal] public delegate void InterpolationTickUpdatedEventHandler(GodotWrapper<SoftTick> wrapper);
-    [Signal] public delegate void ExtrapolationTickUpdatedEventHandler(GodotWrapper<SoftTick> wrapper, float tickDelta);
-    [Signal] public delegate void PredictionTickUpdatedEventHandler(GodotWrapper<SoftTick> wrapper, float tickDelta);
+    [Signal] public delegate void InterpolationTickUpdatedEventHandler(uint curretnTick);
+    [Signal] public delegate void ExtrapolationTickUpdatedEventHandler(uint curretnTick);
+    [Signal] public delegate void PredictionTickUpdatedEventHandler(uint curretnTick);
 
     // Exports
     // NOTE: After testing on 150ms/15ms normal deviation 2 was good enough, but 1.5 work great on localhost (Maybe it can even lower but not exactly 1)
@@ -29,9 +28,7 @@ public partial class TickClock : Node, IInitializable
     private float AvarageLatency;
     private float LatencyStd;
     private float Jitter => 3 * LatencyStd; // Set jitter as 99.7% of distribution (or 3 standart deviations)
-    private readonly Stopwatch TickUpdateStopwatch = new();
-    private float PhysicsProcessDelta;
-    private float PreviousBuffer;
+    private int PreviousBufferTicks;
 
     public override void _Ready()
     {
@@ -69,51 +66,46 @@ public partial class TickClock : Node, IInitializable
         var combinedJobs = new ConcurrentJob(weightedJobs);
 
         // Start pinging the server after initialization is complete
-        combinedJobs.Completed += () =>
-        {
-            ProcessMode = ProcessModeEnum.Always;
-            TickUpdateStopwatch.Start();
-        };
+        combinedJobs.Completed += () => ProcessMode = ProcessModeEnum.Always;
 
         return [new(combinedJobs)];
     }
 
-    private SoftTick UpdateServerTick()
-    {
-        // Getting precise delta
-        double processDelta = TickUpdateStopwatch.Elapsed.TotalSeconds;
-        TickUpdateStopwatch.Restart();
-
-        var (serverTick, delta) = Synchronizer.UpdateTick((float)processDelta);
-        PhysicsProcessDelta += delta;
-        return serverTick;
-    }
-
     public override void _Process(double _)
     {
-        var serverTick = UpdateServerTick();
+        var serverTick = Synchronizer.CurrentTick;
 
-        float buffer = Jitter + AvarageLatency + serverTick.TickInterval;
+        float physicsInterval = 1f / Engine.PhysicsTicksPerSecond;
+        float buffer = Jitter + AvarageLatency + physicsInterval;
 
-        // Calculate interpolation tick
-        var interpolationTick = serverTick.AddDuration(-buffer);
-        EmitSignal(SignalName.InterpolationTickUpdated, new GodotWrapper<SoftTick>(interpolationTick));
+        // Prevent flickering of buffer tick number
+        int bufferTicks = Mathf.CeilToInt(buffer / physicsInterval);
+        if (PreviousBufferTicks - 1.5f < (buffer / physicsInterval) && PreviousBufferTicks > bufferTicks)
+            bufferTicks = PreviousBufferTicks;
+        else PreviousBufferTicks = bufferTicks;
+
+        uint interpolationTick = (uint)(serverTick - bufferTicks);
+        EmitSignal(SignalName.InterpolationTickUpdated, interpolationTick);
     }
 
-    public override void _PhysicsProcess(double _)
+    public override void _PhysicsProcess(double delta)
     {
-        var serverTick = UpdateServerTick();
+        var serverTick = Synchronizer.UpdateTick((float)delta);
 
-        float buffer = Jitter + AvarageLatency + serverTick.TickInterval * SafeTickMargin;
+        float physicsInterval = 1f / Engine.PhysicsTicksPerSecond;
+        float buffer = Jitter + AvarageLatency + physicsInterval * SafeTickMargin;
 
-        // Add elapsed delta time from the last _Process call
-        var extrapolationTick = serverTick.AddDuration(-buffer);
-        var predictionTick = serverTick.AddDuration(buffer);
+        // Prevent flickering of buffer tick number
+        int bufferTicks = Mathf.CeilToInt(buffer / physicsInterval);
+        if (PreviousBufferTicks - 1.5f < (buffer / physicsInterval) && PreviousBufferTicks > bufferTicks)
+            bufferTicks = PreviousBufferTicks;
+        else PreviousBufferTicks = bufferTicks;
 
-        EmitSignal(SignalName.ExtrapolationTickUpdated, new GodotWrapper<SoftTick>(extrapolationTick), PhysicsProcessDelta - buffer + PreviousBuffer);
-        EmitSignal(SignalName.PredictionTickUpdated, new GodotWrapper<SoftTick>(predictionTick), PhysicsProcessDelta + buffer - PreviousBuffer);
-        PhysicsProcessDelta = 0;
-        PreviousBuffer = buffer;
+        uint extrapolationTick = (uint)(serverTick - bufferTicks);
+        uint predictionTick = (uint)(serverTick + bufferTicks);
+
+        EmitSignal(SignalName.ExtrapolationTickUpdated, extrapolationTick);
+        EmitSignal(SignalName.PredictionTickUpdated, predictionTick);
     }
 
     private void OnLatencyCalculated(float avarage, float std)
@@ -126,6 +118,5 @@ public partial class TickClock : Node, IInitializable
     {
         ProcessMode = ProcessModeEnum.Disabled;
         Pinger.ProcessMode = ProcessModeEnum.Disabled;
-        TickUpdateStopwatch.Reset();
     }
 }

@@ -16,8 +16,10 @@ public partial class TickSynchronizer : Node, IInitializable
     [Export] private uint TolerableTickDifference = 3;
 
     // Other properties
+    public uint CurrentTick { get; private set; } // Current predicted server tick
+    private float PreferredTick;
     private float AvarageLatency;
-    private SoftTick CurrentServerTick;
+    private float AccumulatedDeviation;
     private float CatchUpTimeScale;
 
     public override void _Ready()
@@ -60,7 +62,7 @@ public partial class TickSynchronizer : Node, IInitializable
         syncInfoReceiveJob.Completed += () =>
         {
             // Set tick rate
-            CurrentServerTick = new SoftTick((uint)syncInfo.ServerTicksPerSecond);
+            Engine.PhysicsTicksPerSecond = syncInfo.ServerTicksPerSecond;
 
             // Subscribe to Sync and SyncInfo messages
             Network.Singleton.MessageReceived += (msg) =>
@@ -68,7 +70,7 @@ public partial class TickSynchronizer : Node, IInitializable
                 switch (msg.Value)
                 {
                     case SyncInfo syncInfo:
-                        OnSyncInfoReceived(syncInfo);
+                        Engine.PhysicsTicksPerSecond = syncInfo.ServerTicksPerSecond;
                         break;
                     case Sync sync:
                         OnSyncReceived(sync);
@@ -76,32 +78,37 @@ public partial class TickSynchronizer : Node, IInitializable
                 }
             };
         };
-        return new List<JobInfo>() { new(syncInfoReceiveJob) };
+        return [new(syncInfoReceiveJob)];
     }
 
     /// <summary> Updates <c>CurrentServerTick</c> and return it with time-scaled delta time. </summary>
-    public (SoftTick, float) UpdateTick(float delta)
+    public uint UpdateTick(float delta)
     {
-        float finalDelta = delta * CatchUpTimeScale;
-        CurrentServerTick = CurrentServerTick.AddDuration(finalDelta);
-        return (CurrentServerTick, finalDelta);
+        CurrentTick++;
+        PreferredTick++;
+
+        float physicsInterval = 1f / Engine.PhysicsTicksPerSecond;
+        float deviation = delta * CatchUpTimeScale - physicsInterval;
+        AccumulatedDeviation += deviation;
+
+        if (Math.Abs(AccumulatedDeviation) > physicsInterval)
+            CurrentTick = (uint)(CurrentTick + (int)(AccumulatedDeviation / physicsInterval));
+        AccumulatedDeviation %= physicsInterval;
+
+        UpdateCatchUp();
+
+        return CurrentTick;
     }
 
-    private void OnSyncInfoReceived(SyncInfo syncInfo) =>
-        CurrentServerTick = new SoftTick((uint)syncInfo.ServerTicksPerSecond) { TickCount = CurrentServerTick.TickCount };
-
-    private void OnLatencyCalculated(float avarage, float _) => AvarageLatency = avarage;
-
-    private void OnSyncReceived(Sync sync)
+    private void UpdateCatchUp()
     {
-        var preferredTick = new SoftTick(CurrentServerTick.TickRate) { TickCount = sync.ServerTick }
-            .AddDuration(AvarageLatency);
-
-        float errorTicksDelta = SoftTick.GetDuration(preferredTick, CurrentServerTick) * CurrentServerTick.TickRate;
+        float physicsInterval = 1f / Engine.PhysicsTicksPerSecond;
+        float errorTicksDelta = PreferredTick - CurrentTick + (AccumulatedDeviation / physicsInterval);
         if (Math.Abs(errorTicksDelta) > TolerableTickDifference)
         {
             // Hard catch up
-            CurrentServerTick = preferredTick;
+            CurrentTick = (uint)PreferredTick;
+            AccumulatedDeviation = 0;
             CatchUpTimeScale = 1f;
             EmitSignal(SignalName.HardCatchUpHappened);
             return;
@@ -114,5 +121,16 @@ public partial class TickSynchronizer : Node, IInitializable
             y = -y;
 
         CatchUpTimeScale = 1f + y;
+    }
+
+    private void OnLatencyCalculated(float avarage, float _) => AvarageLatency = avarage;
+
+    private void OnSyncReceived(Sync sync)
+    {
+        float physicsInterval = 1f / Engine.PhysicsTicksPerSecond;
+        float latencyTicks = AvarageLatency / physicsInterval;
+        PreferredTick = sync.ServerTick + latencyTicks;
+
+        UpdateCatchUp();
     }
 }

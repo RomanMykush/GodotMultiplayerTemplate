@@ -14,5 +14,4 @@
 
 [node name="ClientStartUp" type="Node"]
 script = ExtResource("1_g74xa")
-PhysicsTicksRate = 60
 Singletons = Array[PackedScene]([ExtResource("2_gdchd"), ExtResource("2_th4kk"), ExtResource("2_2vh7v"), ExtResource("3_pmmsf"), ExtResource("6_vwb43"), ExtResource("8_2olac"), ExtResource("9_bv06a"), ExtResource("10_egyjx"), ExtResource("11_nb0st"), ExtResource("11_ydjyc")])

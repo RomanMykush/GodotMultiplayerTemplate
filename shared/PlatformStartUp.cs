@@ -5,13 +5,10 @@ namespace SteampunkDnD.Shared;
 
 public abstract partial class PlatformStartUp : Node
 {
-    [Export] private int PhysicsTicksRate;
     [Export] private Godot.Collections.Array<PackedScene> Singletons { get; set; }
 
     public override sealed void _Ready()
     {
-        // Configure engine
-        Engine.PhysicsTicksPerSecond = PhysicsTicksRate;
         // Spawn autoloads
         var root = GetTree().Root;
         foreach (var scene in Singletons)

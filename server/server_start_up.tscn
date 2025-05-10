@@ -9,5 +9,4 @@
 
 [node name="ServerStartUp" type="Node"]
 script = ExtResource("1_xe13r")
-PhysicsTicksRate = 10
 Singletons = Array[PackedScene]([ExtResource("2_ubffh"), ExtResource("3_vjap7"), ExtResource("4_58rdl"), ExtResource("4_550e4"), ExtResource("6_ljauo")])
