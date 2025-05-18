@@ -12,7 +12,9 @@ public partial class GameWorld : Node
 
     private EntityContainer Container;
 
-    private readonly SortedSet<StateSnapshot> Snapshots = new(new StateSnapshotTickComparer());
+    private readonly SortedSet<StateSnapshot> RecentSnapshots = new(new StateSnapshotTickComparer());
+    private readonly Dictionary<uint, StateSnapshot> SnapshotHistory = [];
+    private const int MaxSnapshotHistoryCount = 100;
     private StateSnapshot LastInterpolationSnapshot = new(0, [], []);
     private uint LastInterpolationTick;
     private StateSnapshot LastPredictionSnapshot = new(0, [], []);
@@ -38,51 +40,87 @@ public partial class GameWorld : Node
 
         Network.Singleton.MessageReceived += (msg) =>
         {
+            if (msg.Value is DeltaStateSnapshot delta)
+                OnDeltaSnapshotReceived(delta);
+
             if (msg.Value is StateSnapshot snapshot)
-                OnSnapshotReceived(snapshot);
+                ProcessNewSnapshot(snapshot);
         };
     }
 
-    private void OnSnapshotReceived(StateSnapshot snapshot)
+    private void OnDeltaSnapshotReceived(DeltaStateSnapshot delta)
+    {
+        // Check if baseline snapshot exists
+        if (!SnapshotHistory.TryGetValue(delta.Baseline, out var baseline))
+        {
+            Logger.Singleton.Log(LogLevel.Warning, "Server send delta snapshot, baseline snapshot of which is not present on client");
+            return;
+        }
+
+        var snapshot = StateSnapshotUtils.DeltaDecode(baseline, delta);
+        ProcessNewSnapshot(snapshot);
+
+        // Remove obsolete snapshots
+        var obsoleteTicks = SnapshotHistory.Keys.Where(k => k < delta.Baseline);
+        foreach (var tick in obsoleteTicks)
+            SnapshotHistory.Remove(tick);
+    }
+
+    private void ProcessNewSnapshot(StateSnapshot snapshot)
     {
         // Remove existing snapshot with same Tick value
-        if (Snapshots.Remove(snapshot))
+        if (RecentSnapshots.Remove(snapshot))
             Logger.Singleton.Log(LogLevel.Warning, "Snapshot with such Tick value already exists. Overwriting an old one");
 
-        Snapshots.Add(snapshot);
+        // Handle snapshot history leaking
+        if (SnapshotHistory.Count > MaxSnapshotHistoryCount - 1)
+        {
+            Logger.Singleton.Log(LogLevel.Warning, "Snapshot history is overfilled. Removing most old ones");
+            var obsoleteTicks = SnapshotHistory.Keys
+                .OrderDescending().Skip(MaxSnapshotHistoryCount - 1);
+            foreach (var tick in obsoleteTicks)
+                SnapshotHistory.Remove(tick);
+        }
+
+        RecentSnapshots.Add(snapshot);
+        SnapshotHistory[snapshot.Tick] = snapshot;
+
+        // Send snapshot acknowledgment
+        var snapshotAck = new StateSnapshotAck(snapshot.Tick);
+        Network.Singleton.SendMessage(snapshotAck);
     }
 
     /// <summary> Deletes old snapshots except for the most recent old snapshot. </summary>
     private void DeleteOldSnapshots(uint currentTick)
     {
         // Check if at least 2 snapshots exist
-        if (Snapshots.Count < 2)
+        if (RecentSnapshots.Count < 2)
             return;
-        var first = Snapshots.Min;
+        var first = RecentSnapshots.Min;
         if (first.Tick > currentTick)
             return;
 
-        Snapshots.Remove(Snapshots.Min);
+        RecentSnapshots.Remove(RecentSnapshots.Min);
         do
         {
-            var second = Snapshots.Min;
+            var second = RecentSnapshots.Min;
             if (second.Tick > currentTick)
                 break;
             first = second;
-            Snapshots.Remove(first);
-        } while (Snapshots.Count > 0);
-        Snapshots.Add(first);
+            RecentSnapshots.Remove(first);
+        } while (RecentSnapshots.Count > 0);
+        RecentSnapshots.Add(first);
     }
 
     private IEnumerable<EntityState> GetInterpolatedPresentStates(uint currentTick)
     {
-        var pastSnapshot = Snapshots.Min;
+        var pastSnapshot = RecentSnapshots.Min;
         if (pastSnapshot.Tick == currentTick)
             return pastSnapshot.States;
 
         // Get next to past snapshot
         StateSnapshot futureSnapshot = null;
-        foreach (var snapshot in Snapshots.Skip(1))
+        foreach (var snapshot in RecentSnapshots.Skip(1))
         {
             if (snapshot.Tick > currentTick)
             {
@@ -109,9 +147,9 @@ public partial class GameWorld : Node
         DeleteOldSnapshots(currentTick);
 
         // Check if at least 2 snapshots exist
-        if (Snapshots.Count < 2)
+        if (RecentSnapshots.Count < 2)
             return;
-        var pastSnapshot = Snapshots.Min;
+        var pastSnapshot = RecentSnapshots.Min;
         if (pastSnapshot.Tick > currentTick)
             return;
 
@@ -139,9 +177,9 @@ public partial class GameWorld : Node
                 {
                     Logger.Singleton.Log(LogLevel.Error, e.Message);
                 }
-        }
+            }
 
-        // Process metadata
+            // Process metadata
             foreach (var meta in pastSnapshot.MetaData)
             {
                 switch (meta)
@@ -212,7 +250,7 @@ public partial class GameWorld : Node
 
     private void OnPredictionTickUpdated(uint currentTick)
     {
-        if (Snapshots.Count < 1)
+        if (RecentSnapshots.Count < 1)
             return;
 
         // Check if next prediction tick is less then previous one(s)
@@ -232,7 +270,7 @@ public partial class GameWorld : Node
         }
 
         // Check if there is new latest snapshot
-        var latestSnapshot = Snapshots.Max;
+        var latestSnapshot = RecentSnapshots.Max;
         if (LastPredictionSnapshot != latestSnapshot)
         {
             // Get last outdated tick

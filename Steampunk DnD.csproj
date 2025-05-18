@@ -5,6 +5,7 @@
     <RootNamespace>SteampunkDnD</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="CompareNETObjects" Version="4.83.0" />
     <PackageReference Include="GodotInputMapExtension" Version="0.1.4" />
     <PackageReference Include="MemoryPack" Version="1.21.1" />
   </ItemGroup>

@@ -1,11 +1,10 @@
 using Godot;
 using MemoryPack;
-using System;
 using System.Collections.Generic;
 
 namespace SteampunkDnD.Shared;
 
-[MemoryPackUnion(1, typeof(RecentCommandSnapshots))]
+[MemoryPackUnion(3, typeof(RecentCommandSnapshots))]
 public partial interface INetworkMessage { }
 
 [MemoryPackable]

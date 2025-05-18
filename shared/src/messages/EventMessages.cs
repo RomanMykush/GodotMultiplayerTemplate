@@ -1,16 +1,14 @@
-using Godot;
 using MemoryPack;
-using System;
 
 namespace SteampunkDnD.Shared;
 
-[MemoryPackUnion(2, typeof(SyncInfo))]
-[MemoryPackUnion(3, typeof(SyncInfoRequest))]
-[MemoryPackUnion(4, typeof(Sync))]
-[MemoryPackUnion(5, typeof(ServerAuth))]
-[MemoryPackUnion(6, typeof(ClientAuth))]
-[MemoryPackUnion(7, typeof(NewPlayerIdRequest))]
-[MemoryPackUnion(8, typeof(NewPlayerId))]
+[MemoryPackUnion(4, typeof(SyncInfo))]
+[MemoryPackUnion(5, typeof(SyncInfoRequest))]
+[MemoryPackUnion(6, typeof(Sync))]
+[MemoryPackUnion(7, typeof(ServerAuth))]
+[MemoryPackUnion(8, typeof(ClientAuth))]
+[MemoryPackUnion(9, typeof(NewPlayerIdRequest))]
+[MemoryPackUnion(10, typeof(NewPlayerId))]
 public partial interface INetworkMessage { }
 
 public abstract record NetworkEvent : INetworkMessage;
