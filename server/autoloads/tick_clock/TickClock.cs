@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Godot;
 using SteampunkDnD.Shared;
 
@@ -8,6 +9,7 @@ public partial class TickClock : Node
     public static TickClock Singleton { get; private set; }
     [Signal] public delegate void TickUpdatedEventHandler(uint currentTick);
     public uint CurrentTick { get; private set; }
+    private readonly Stopwatch CurrentTickWatch = new();
 
     public override void _Ready()
     {
@@ -17,11 +19,11 @@ public partial class TickClock : Node
         {
             switch (wrapper.Value)
             {
-                case Sync sync:
+                case SyncRequest sync:
                     OnSyncReceived(peer, sync);
                     break;
                 case SyncInfoRequest decimalValue:
-                    OnSyncInfoRequestReceived(peer);
+                    OnSyncInfoReceived(peer);
                     break;
             }
         };
@@ -30,16 +32,17 @@ public partial class TickClock : Node
     public override void _PhysicsProcess(double _)
     {
         CurrentTick++;
+        CurrentTickWatch.Restart();
         EmitSignal(SignalName.TickUpdated, CurrentTick);
     }
 
-    private void OnSyncReceived(int peer, Sync sync)
+    private void OnSyncReceived(int peer, SyncRequest sync)
     {
-        var reply = sync with { ServerTick = CurrentTick };
+        var reply = new Sync(sync.ClientTime, CurrentTick, (float)CurrentTickWatch.Elapsed.TotalSeconds);
         Network.Singleton.SendMessage(peer, reply);
     }
 
-    private void OnSyncInfoRequestReceived(int peer)
+    private void OnSyncInfoReceived(int peer)
     {
         var tickRate = Engine.PhysicsTicksPerSecond;
         var syncInfo = new SyncInfo(tickRate);

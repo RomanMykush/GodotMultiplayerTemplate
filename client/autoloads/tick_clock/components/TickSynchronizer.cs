@@ -64,7 +64,7 @@ public partial class TickSynchronizer : Node, IInitializable
             // Set tick rate
             Engine.PhysicsTicksPerSecond = syncInfo.ServerTicksPerSecond;
 
-            // Subscribe to Sync and SyncInfo messages
+            // Subscribe to sync and sync info messages
             Network.Singleton.MessageReceived += (msg) =>
             {
                 switch (msg.Value)
@@ -128,8 +128,10 @@ public partial class TickSynchronizer : Node, IInitializable
     private void OnSyncReceived(Sync sync)
     {
         float physicsInterval = 1f / Engine.PhysicsTicksPerSecond;
-        float latencyTicks = AvarageLatency / physicsInterval;
-        PreferredTick = sync.ServerTick + latencyTicks;
+        // Perform Min() on duration for cases when server performance can't keep up with tickrate
+        float tickDuration = Math.Min(sync.ServerTickDuration, physicsInterval);
+        float shiftInTicks = (tickDuration + AvarageLatency) / physicsInterval;
+        PreferredTick = sync.ServerTick + shiftInTicks;
 
         UpdateCatchUp();
     }

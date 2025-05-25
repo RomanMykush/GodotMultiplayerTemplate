@@ -13,13 +13,13 @@ public partial class LatencyCalculator : Node, IInitializable
     [Export] private uint MinSampleSize = 5;
     [Export] private uint SampleSize = 30;
 
-    private readonly Queue<float> LatencySamples = new(); // Latency samples of Sync message in seconds
+    private readonly Queue<float> LatencySamples = new(); // Latency samples of sync message in seconds
 
     public IEnumerable<JobInfo> ConstructInitJobs()
     {
         LatencySamples.Clear();
         // Start populating LatencySamples with data
-        // TODO: Fix this, sometimes signals of incoming Sync packets are missed. Temporary solution is turning on SyncPinger
+        // TODO: Fix this, sometimes signals of incoming sync packets are missed. Temporary solution is turning on SyncPinger
         var jobs = new Dictionary<Job, float>();
         for (int i = 0; i < MinSampleSize; i++)
         {
@@ -28,10 +28,10 @@ public partial class LatencyCalculator : Node, IInitializable
                 // Send sync message
                 DeferredUtils.CallDeferred(() =>
                 {
-                    var sync = new Sync((uint)Time.GetTicksMsec(), 0);
+                    var sync = new SyncRequest((uint)Time.GetTicksMsec());
                     Network.Singleton.SendMessage(sync, MultiplayerPeer.TransferModeEnum.Reliable);
                 });
-                // Wait for Sync message to arrive
+                // Wait for sync message to arrive
                 Sync sync = null;
                 SignalAwaiter awaiter = null;
                 while (sync == null)

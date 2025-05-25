@@ -5,10 +5,11 @@ namespace SteampunkDnD.Shared;
 [MemoryPackUnion(4, typeof(SyncInfo))]
 [MemoryPackUnion(5, typeof(SyncInfoRequest))]
 [MemoryPackUnion(6, typeof(Sync))]
-[MemoryPackUnion(7, typeof(ServerAuth))]
-[MemoryPackUnion(8, typeof(ClientAuth))]
-[MemoryPackUnion(9, typeof(NewPlayerIdRequest))]
-[MemoryPackUnion(10, typeof(NewPlayerId))]
+[MemoryPackUnion(7, typeof(SyncRequest))]
+[MemoryPackUnion(8, typeof(ServerAuth))]
+[MemoryPackUnion(9, typeof(ClientAuth))]
+[MemoryPackUnion(10, typeof(NewPlayerIdRequest))]
+[MemoryPackUnion(11, typeof(NewPlayerId))]
 public partial interface INetworkMessage { }
 
 public abstract record NetworkEvent : INetworkMessage;
@@ -20,7 +21,10 @@ public partial record SyncInfo(int ServerTicksPerSecond) : NetworkEvent;
 public partial record SyncInfoRequest() : NetworkEvent;
 
 [MemoryPackable]
-public partial record Sync(uint ClientTime, uint ServerTick) : NetworkEvent;
+public partial record Sync(uint ClientTime, uint ServerTick, float ServerTickDuration) : NetworkEvent;
+
+[MemoryPackable]
+public partial record SyncRequest(uint ClientTime) : NetworkEvent;
 
 [MemoryPackable]
 public partial record ServerAuth(uint ServerId) : NetworkEvent;
