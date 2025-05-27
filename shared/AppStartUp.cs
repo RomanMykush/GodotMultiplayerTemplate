@@ -10,19 +10,31 @@ public partial class AppStartUp : Node
     [Export(PropertyHint.File, "*.tscn")] private string ServerStartUpPath { get; set; }
     public override void _Ready()
     {
-#if TOOLS           // Editor build
-        if (OS.GetCmdlineUserArgs().Contains("--test-server"))
+        Logger.Singleton.Log(LogLevel.Trace, "App started");
+
+        // Editor build
+        if (OS.HasFeature("editor"))
         {
+            if (OS.GetCmdlineUserArgs().Contains("--test-server"))
+            {
+                // Start as dedicated server
+                StartUp(ServerStartUpPath);
+                return;
+            }
+            // Start as client
+            StartUp(ClientStartUpPath);
+            return;
+        }
+
+        // Export build
+        if (OS.HasFeature("dedicated_server"))
+        {
+            // Start as dedicated server
             StartUp(ServerStartUpPath);
             return;
         }
+        // Start as client
         StartUp(ClientStartUpPath);
-#elif GODOT_SERVER  // Start as dedicated server
-        StartUp(ServerStartUpPath);
-#else               // Start as client
-        StartUp(ClientStartUpPath);
-#endif
-        Logger.Singleton.Log(LogLevel.Trace, "App started");
     }
 
     private void StartUp(string path) =>
