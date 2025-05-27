@@ -2,7 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 
-namespace SteampunkDnD.Shared;
+namespace GodotMultiplayerTemplate.Shared;
 
 public class BidirectionalDictionary<T, U> : IEnumerable<KeyValuePair<T, U>>
     where T : notnull

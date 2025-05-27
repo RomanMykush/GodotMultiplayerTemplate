@@ -1,6 +1,6 @@
 using MemoryPack;
 
-namespace SteampunkDnD.Shared;
+namespace GodotMultiplayerTemplate.Shared;
 
 [MemoryPackable]
 [MemoryPackUnion(0, typeof(PlayerPossessionMeta))]

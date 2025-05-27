@@ -1,8 +1,8 @@
 using System.Diagnostics;
 using Godot;
-using SteampunkDnD.Shared;
+using GodotMultiplayerTemplate.Shared;
 
-namespace SteampunkDnD.Server;
+namespace GodotMultiplayerTemplate.Server;
 
 public partial class TickClock : Node
 {

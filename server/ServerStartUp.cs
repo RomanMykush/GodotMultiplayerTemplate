@@ -1,8 +1,8 @@
 using Godot;
-using SteampunkDnD.Shared;
+using GodotMultiplayerTemplate.Shared;
 using System;
 
-namespace SteampunkDnD.Server;
+namespace GodotMultiplayerTemplate.Server;
 
 public partial class ServerStartUp : PlatformStartUp
 {
@@ -17,7 +17,7 @@ public partial class ServerStartUp : PlatformStartUp
         int maxPlayers = AppManager.Singleton.DefaultMaxPlayers;
         if (CmdUtils.GetParameterValue("-n", out value))
             maxPlayers = value;
-        
+
         Network.Singleton.StartServer(port, maxPlayers);
         Logger.Singleton.Log(LogLevel.Trace, "Server started");
     }

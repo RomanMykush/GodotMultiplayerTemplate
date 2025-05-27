@@ -1,9 +1,9 @@
 using Godot;
-using SteampunkDnD.Shared;
+using GodotMultiplayerTemplate.Shared;
 using System;
 using MemoryPack;
 
-namespace SteampunkDnD.Client;
+namespace GodotMultiplayerTemplate.Client;
 
 // WARN: This service does NOT use secure authentication
 public partial class AuthService : Node

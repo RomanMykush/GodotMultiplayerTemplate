@@ -1,9 +1,9 @@
 using Godot;
-using SteampunkDnD.Shared;
+using GodotMultiplayerTemplate.Shared;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace SteampunkDnD.Client;
+namespace GodotMultiplayerTemplate.Client;
 
 public partial class TickClock : Node, IInitializable
 {

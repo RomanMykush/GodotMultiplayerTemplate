@@ -1,7 +1,7 @@
 using Godot;
 using MemoryPack;
 
-namespace SteampunkDnD.Shared;
+namespace GodotMultiplayerTemplate.Shared;
 
 public abstract partial class NetworkBase : Node
 {

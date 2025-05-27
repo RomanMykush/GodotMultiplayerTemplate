@@ -1,7 +1,7 @@
 using Godot;
 using System;
 
-namespace SteampunkDnD.Client;
+namespace GodotMultiplayerTemplate.Client;
 
 public partial class SceneFactory : Node
 {

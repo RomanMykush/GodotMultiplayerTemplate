@@ -3,7 +3,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace SteampunkDnD.Shared;
+namespace GodotMultiplayerTemplate.Shared;
 
 public static class DeferredUtils
 {

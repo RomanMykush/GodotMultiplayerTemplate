@@ -1,6 +1,6 @@
 cd ..
 
-proj_name="Steampunk DnD"
+proj_name="GodotMultiplayerTemplate"
 
 if [ -d ./builds/artifacts/windows ]; then
     echo "Clearing previous artifacts..."

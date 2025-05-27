@@ -1,7 +1,7 @@
 using Godot;
 using System;
 
-namespace SteampunkDnD.Shared;
+namespace GodotMultiplayerTemplate.Shared;
 
 public static class EntityUtils
 {

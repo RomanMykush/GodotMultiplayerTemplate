@@ -2,7 +2,7 @@ using Godot;
 using MemoryPack;
 using System.Collections.Generic;
 
-namespace SteampunkDnD.Shared;
+namespace GodotMultiplayerTemplate.Shared;
 
 [MemoryPackUnion(3, typeof(RecentCommandSnapshots))]
 public partial interface INetworkMessage { }

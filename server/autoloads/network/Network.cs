@@ -1,8 +1,8 @@
 using Godot;
-using SteampunkDnD.Shared;
+using GodotMultiplayerTemplate.Shared;
 using System;
 
-namespace SteampunkDnD.Server;
+namespace GodotMultiplayerTemplate.Server;
 
 public partial class Network : NetworkBase
 {

@@ -1,7 +1,7 @@
 using System.Collections.Generic;
-using SteampunkDnD.Shared;
+using GodotMultiplayerTemplate.Shared;
 
-namespace SteampunkDnD.Client;
+namespace GodotMultiplayerTemplate.Client;
 
 public interface ICommandSource
 {

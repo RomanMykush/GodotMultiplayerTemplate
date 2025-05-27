@@ -1,8 +1,8 @@
 using Godot;
-using SteampunkDnD.Shared;
+using GodotMultiplayerTemplate.Shared;
 using System.Collections.Generic;
 
-namespace SteampunkDnD.Client;
+namespace GodotMultiplayerTemplate.Client;
 
 public partial class CameraContainer : Node3D, ICommandSource
 {

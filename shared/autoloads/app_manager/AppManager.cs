@@ -2,7 +2,7 @@ using Godot;
 using System;
 using System.Threading;
 
-namespace SteampunkDnD.Shared;
+namespace GodotMultiplayerTemplate.Shared;
 
 public partial class AppManager : Node
 {

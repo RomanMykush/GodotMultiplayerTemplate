@@ -1,6 +1,6 @@
 using MemoryPack;
 
-namespace SteampunkDnD.Shared;
+namespace GodotMultiplayerTemplate.Shared;
 
 [MemoryPackUnion(4, typeof(SyncInfo))]
 [MemoryPackUnion(5, typeof(SyncInfoRequest))]

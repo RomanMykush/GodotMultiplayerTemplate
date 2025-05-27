@@ -1,7 +1,7 @@
 using Godot;
 using System;
 
-namespace SteampunkDnD.Shared;
+namespace GodotMultiplayerTemplate.Shared;
 
 public partial class StaticProp : StaticBody3D, ISpatial
 {
@@ -15,7 +15,7 @@ public partial class StaticProp : StaticBody3D, ISpatial
     {
         if (state is not StaticState staticState)
             throw new ArgumentException("Invalid argument type was passed");
-        
+
         if (EntityId == 0)
             EntityId = staticState.EntityId;
         else if (EntityId != staticState.EntityId)

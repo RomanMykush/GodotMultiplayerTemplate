@@ -1,7 +1,7 @@
 using Godot;
-using SteampunkDnD.Shared;
+using GodotMultiplayerTemplate.Shared;
 
-namespace SteampunkDnD.Server;
+namespace GodotMultiplayerTemplate.Server;
 
 public abstract partial class CharacterController : Node
 {

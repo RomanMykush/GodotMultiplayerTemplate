@@ -1,4 +1,4 @@
-namespace SteampunkDnD.Shared;
+namespace GodotMultiplayerTemplate.Shared;
 
 public readonly struct MarkedValue<TValue>
 {

@@ -2,7 +2,7 @@ using Godot;
 using System;
 using System.Text;
 
-namespace SteampunkDnD.Shared;
+namespace GodotMultiplayerTemplate.Shared;
 
 public static class StringUtils
 {

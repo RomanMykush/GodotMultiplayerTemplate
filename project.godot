@@ -10,7 +10,7 @@ config_version=5
 
 [application]
 
-config/name="Steampunk DnD"
+config/name="GodotMultiplayerTemplate"
 run/main_scene="res://shared/app_start_up.tscn"
 config/features=PackedStringArray("4.4", "C#", "Forward Plus")
 config/icon="res://icon.svg"
@@ -23,7 +23,7 @@ AppManager="*res://shared/autoloads/app_manager/app_manager.tscn"
 
 [dotnet]
 
-project/assembly_name="Steampunk DnD"
+project/assembly_name="GodotMultiplayerTemplate"
 
 [file_customization]
 

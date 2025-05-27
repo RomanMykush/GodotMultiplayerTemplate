@@ -1,6 +1,6 @@
 ﻿Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Steampunk DnD", "Steampunk DnD.csproj", "{AE0BB5CD-C694-4904-850B-8432CBAEB028}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GodotMultiplayerTemplate", "GodotMultiplayerTemplate.csproj", "{AE0BB5CD-C694-4904-850B-8432CBAEB028}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

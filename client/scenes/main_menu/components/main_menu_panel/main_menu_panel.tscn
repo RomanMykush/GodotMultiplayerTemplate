@@ -137,7 +137,7 @@ theme_override_constants/separation = 15
 
 [node name="Title" type="Label" parent="HBoxContainer/MainPanel/MarginContainer/VBoxContainer"]
 layout_mode = 2
-text = "Steampunk DnD rpg"
+text = "Godot Multiplayer Template"
 
 [node name="Spacer" type="Control" parent="HBoxContainer/MainPanel/MarginContainer/VBoxContainer"]
 layout_mode = 2

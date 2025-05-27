@@ -1,9 +1,9 @@
 using Godot;
 using GodotInputMapExtension;
-using SteampunkDnD.Shared;
+using GodotMultiplayerTemplate.Shared;
 using System.Collections.Generic;
 
-namespace SteampunkDnD.Client;
+namespace GodotMultiplayerTemplate.Client;
 
 public partial class KeyInputTranslator : Node, ICommandSource
 {

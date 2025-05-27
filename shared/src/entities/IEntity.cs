@@ -1,7 +1,7 @@
 using Godot;
 using System;
 
-namespace SteampunkDnD.Shared;
+namespace GodotMultiplayerTemplate.Shared;
 
 /// <summary> Represent a synchronized game object. </summary>
 /// <remarks> All classes that implement this interface are expected to derive from <c>Node</c> or succesive type. </remarks>

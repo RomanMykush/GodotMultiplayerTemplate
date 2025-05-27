@@ -1,10 +1,10 @@
 using Godot;
 using MemoryPack;
-using SteampunkDnD.Shared;
+using GodotMultiplayerTemplate.Shared;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace SteampunkDnD.Server;
+namespace GodotMultiplayerTemplate.Server;
 
 public partial class GameWorld : Node
 {

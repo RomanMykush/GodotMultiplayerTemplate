@@ -2,7 +2,7 @@ using Godot;
 using System;
 using System.Linq;
 
-namespace SteampunkDnD.Shared;
+namespace GodotMultiplayerTemplate.Shared;
 
 public partial class AppStartUp : Node
 {

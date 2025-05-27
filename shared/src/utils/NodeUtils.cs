@@ -1,6 +1,6 @@
 using Godot;
 
-namespace SteampunkDnD.Shared;
+namespace GodotMultiplayerTemplate.Shared;
 
 public static class NodeUtils
 {

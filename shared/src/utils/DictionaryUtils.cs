@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace SteampunkDnD.Shared;
+namespace GodotMultiplayerTemplate.Shared;
 
 public static class DictionaryUtils
 {

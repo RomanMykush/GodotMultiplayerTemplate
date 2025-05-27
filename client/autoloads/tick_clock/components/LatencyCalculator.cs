@@ -1,10 +1,10 @@
 using Godot;
-using SteampunkDnD.Shared;
+using GodotMultiplayerTemplate.Shared;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 
-namespace SteampunkDnD.Client;
+namespace GodotMultiplayerTemplate.Client;
 
 public partial class LatencyCalculator : Node, IInitializable
 {
