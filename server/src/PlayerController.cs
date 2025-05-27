@@ -6,8 +6,7 @@ namespace SteampunkDnD.Server;
 
 public partial class PlayerController : CharacterController
 {
-    // TODO: Make property required after migration to .NET 8
-    public uint PlayerId;
+    public required uint PlayerId;
     private Dictionary<uint, IEnumerable<ICommand>> PendingCommands = new();
 
     public override void _Ready()
