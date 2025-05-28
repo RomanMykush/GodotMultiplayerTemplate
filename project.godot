@@ -30,7 +30,8 @@ project/assembly_name="GodotMultiplayerTemplate"
 folder_colors={
 "res://client/": "teal",
 "res://server/": "blue",
-"res://shared/": "orange"
+"res://shared/": "orange",
+"res://tests/": "pink"
 }
 
 [input]

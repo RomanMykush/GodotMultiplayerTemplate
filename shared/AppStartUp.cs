@@ -8,6 +8,8 @@ public partial class AppStartUp : Node
 {
     [Export(PropertyHint.File, "*.tscn")] private string ClientStartUpPath { get; set; }
     [Export(PropertyHint.File, "*.tscn")] private string ServerStartUpPath { get; set; }
+    [Export(PropertyHint.File, "*.tscn")] private string TestsStartUpPath { get; set; }
+
     public override void _Ready()
     {
         Logger.Singleton.Log(LogLevel.Trace, "App started");
@@ -15,6 +17,13 @@ public partial class AppStartUp : Node
         // Editor build
         if (OS.HasFeature("editor"))
         {
+            if (OS.GetCmdlineUserArgs().Contains("--tests"))
+            {
+                // Start as tests
+                StartUp(TestsStartUpPath);
+                return;
+            }
+
             if (OS.GetCmdlineUserArgs().Contains("--test-server"))
             {
                 // Start as dedicated server

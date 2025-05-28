@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://covy2nvk8kqsf"]
+
+[ext_resource type="Script" uid="uid://ci4gainlh6bos" path="res://tests/test_scenes/delta_compression/DeltaCompressionTest.cs" id="1_ecub8"]
+
+[node name="DeltaCompressionTest" type="Node"]
+script = ExtResource("1_ecub8")

@@ -6,3 +6,4 @@
 script = ExtResource("1_mv4kq")
 ClientStartUpPath = "res://client/client_start_up.tscn"
 ServerStartUpPath = "res://server/server_start_up.tscn"
+TestsStartUpPath = "uid://dqja44wb4giac"
