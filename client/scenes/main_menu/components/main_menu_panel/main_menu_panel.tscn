@@ -4,11 +4,6 @@
 [ext_resource type="PackedScene" uid="uid://2o0ewa233hyl" path="res://client/scenes/main_menu/components/main_menu_panel/components/host_game_menu.tscn" id="2_wtldl"]
 [ext_resource type="PackedScene" uid="uid://1eml3sfpp73e" path="res://client/scenes/main_menu/components/main_menu_panel/components/join_game_menu.tscn" id="3_vtww1"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_lq1wc"]
-content_margin_top = 3.0
-content_margin_bottom = 3.0
-bg_color = Color(0.129412, 0.129412, 0.129412, 1)
-
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_3n1cp"]
 content_margin_top = 3.0
 content_margin_bottom = 3.0
@@ -17,6 +12,11 @@ bg_color = Color(0.254902, 0.254902, 0.254902, 1)
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_38tw8"]
 content_margin_top = 3.0
 content_margin_bottom = 3.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_lq1wc"]
+content_margin_top = 3.0
+content_margin_bottom = 3.0
+bg_color = Color(0.129412, 0.129412, 0.129412, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_8kwo1"]
 bg_color = Color(0.423529, 0.423529, 0.423529, 1)
@@ -96,15 +96,9 @@ _data = {
 }
 
 [node name="MainMenuPanel" type="MarginContainer"]
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -576.0
-offset_top = -324.0
-offset_right = 576.0
-offset_bottom = 324.0
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 size_flags_horizontal = 4
@@ -122,6 +116,7 @@ theme_override_constants/separation = 0
 alignment = 1
 
 [node name="MainPanel" type="PanelContainer" parent="HBoxContainer"]
+custom_minimum_size = Vector2(200, 0)
 layout_mode = 2
 
 [node name="MarginContainer" type="MarginContainer" parent="HBoxContainer/MainPanel"]
@@ -137,7 +132,9 @@ theme_override_constants/separation = 15
 
 [node name="Title" type="Label" parent="HBoxContainer/MainPanel/MarginContainer/VBoxContainer"]
 layout_mode = 2
-text = "Godot Multiplayer Template"
+text = "Godot Multiplayer
+Template"
+horizontal_alignment = 1
 
 [node name="Spacer" type="Control" parent="HBoxContainer/MainPanel/MarginContainer/VBoxContainer"]
 layout_mode = 2
@@ -145,30 +142,30 @@ size_flags_vertical = 3
 
 [node name="HostButton" type="Button" parent="HBoxContainer/MainPanel/MarginContainer/VBoxContainer"]
 layout_mode = 2
-theme_override_styles/normal = SubResource("StyleBoxFlat_lq1wc")
 theme_override_styles/hover = SubResource("StyleBoxFlat_3n1cp")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_38tw8")
-text = "Host game"
+theme_override_styles/normal = SubResource("StyleBoxFlat_lq1wc")
+text = "Host"
 
 [node name="JoinButton" type="Button" parent="HBoxContainer/MainPanel/MarginContainer/VBoxContainer"]
 layout_mode = 2
-theme_override_styles/normal = SubResource("StyleBoxFlat_lq1wc")
 theme_override_styles/hover = SubResource("StyleBoxFlat_3n1cp")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_38tw8")
-text = "Join game"
+theme_override_styles/normal = SubResource("StyleBoxFlat_lq1wc")
+text = "Join"
 
 [node name="SettingsButton" type="Button" parent="HBoxContainer/MainPanel/MarginContainer/VBoxContainer"]
 layout_mode = 2
-theme_override_styles/normal = SubResource("StyleBoxFlat_lq1wc")
 theme_override_styles/hover = SubResource("StyleBoxFlat_3n1cp")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_38tw8")
+theme_override_styles/normal = SubResource("StyleBoxFlat_lq1wc")
 text = "Settings"
 
 [node name="ExitButton" type="Button" parent="HBoxContainer/MainPanel/MarginContainer/VBoxContainer"]
 layout_mode = 2
-theme_override_styles/normal = SubResource("StyleBoxFlat_lq1wc")
 theme_override_styles/hover = SubResource("StyleBoxFlat_3n1cp")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_38tw8")
+theme_override_styles/normal = SubResource("StyleBoxFlat_lq1wc")
 text = "Exit"
 
 [node name="Spacer2" type="Control" parent="HBoxContainer/MainPanel/MarginContainer/VBoxContainer"]
@@ -208,13 +205,13 @@ theme_override_styles/panel = SubResource("StyleBoxFlat_8kwo1")
 [node name="SidePanelAnimPlayer" type="AnimationPlayer" parent="."]
 unique_name_in_owner = true
 libraries = {
-"": SubResource("AnimationLibrary_yhftp")
+&"": SubResource("AnimationLibrary_yhftp")
 }
 
 [node name="ContentAnimPlayer" type="AnimationPlayer" parent="."]
 unique_name_in_owner = true
 libraries = {
-"": SubResource("AnimationLibrary_8pem1")
+&"": SubResource("AnimationLibrary_8pem1")
 }
 
 [connection signal="pressed" from="HBoxContainer/MainPanel/MarginContainer/VBoxContainer/HostButton" to="." method="RequestContent" binds= ["HostGameMenu"]]

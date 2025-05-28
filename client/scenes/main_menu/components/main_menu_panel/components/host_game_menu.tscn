@@ -18,6 +18,6 @@ script = ExtResource("1_osf1q")
 [node name="HostButton" type="Button" parent="."]
 layout_mode = 2
 theme_override_font_sizes/font_size = 24
-text = "Host game"
+text = "Host server"
 
 [connection signal="pressed" from="HostButton" to="." method="HostGame"]
