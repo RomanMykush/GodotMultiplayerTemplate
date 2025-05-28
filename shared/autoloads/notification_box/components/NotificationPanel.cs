@@ -1,7 +1,7 @@
 using Godot;
 using System;
 
-namespace GodotMultiplayerTemplate.Client;
+namespace GodotMultiplayerTemplate.Shared;
 
 public partial class NotificationPanel : Control
 {

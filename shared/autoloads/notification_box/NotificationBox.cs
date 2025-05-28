@@ -2,7 +2,7 @@ using Godot;
 using System;
 using System.Threading.Tasks;
 
-namespace GodotMultiplayerTemplate.Client;
+namespace GodotMultiplayerTemplate.Shared;
 
 public partial class NotificationBox : Node
 {
