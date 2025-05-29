@@ -10,10 +10,13 @@ public partial class TestsStartUp : PlatformStartUp
     private const string TestSceneExtension = ".tscn";
 
     private TestsMenu Menu;
+    private CanvasLayer WaitingLayer;
     private MechanicTest CurrentTest;
 
     public override void AfterReady()
     {
+        WaitingLayer = GetNode<CanvasLayer>("%WaitingLayer");
+        WaitingLayer.Hide();
         Menu = GetNode<TestsMenu>("%TestsMenu");
         Menu.TestSelected += OnTestSelected;
 
@@ -54,6 +57,7 @@ public partial class TestsStartUp : PlatformStartUp
     private void OnTestSelected(PackedScene testScene)
     {
         Menu.Hide();
+        WaitingLayer.Show();
         if (IsInstanceValid(CurrentTest))
             CurrentTest.QueueFree();
 
@@ -68,6 +72,7 @@ public partial class TestsStartUp : PlatformStartUp
         _ = NotificationBox.Singleton.Show(message);
 
         Menu.Show();
+        WaitingLayer.Hide();
         if (IsInstanceValid(CurrentTest))
             CurrentTest.QueueFree();
     }
