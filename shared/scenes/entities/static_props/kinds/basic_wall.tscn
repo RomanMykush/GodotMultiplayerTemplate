@@ -1,0 +1,18 @@
+[gd_scene load_steps=4 format=3 uid="uid://bcne54rg7bxv1"]
+
+[ext_resource type="PackedScene" uid="uid://dlg7kiwqonih6" path="res://shared/scenes/entities/static_props/static_prop.tscn" id="1_jcr0p"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_nqje2"]
+size = Vector3(6, 4, 0.2)
+
+[sub_resource type="BoxMesh" id="BoxMesh_cafbd"]
+size = Vector3(6, 4, 0.2)
+
+[node name="BasicWall" instance=ExtResource("1_jcr0p")]
+Kind = "BasicWall"
+
+[node name="CollisionShape3D" parent="." index="0"]
+shape = SubResource("BoxShape3D_nqje2")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="." index="1"]
+mesh = SubResource("BoxMesh_cafbd")

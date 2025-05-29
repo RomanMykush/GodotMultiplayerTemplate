@@ -1,0 +1,14 @@
+[gd_scene load_steps=4 format=3 uid="uid://qtjjy642b46q"]
+
+[ext_resource type="PackedScene" uid="uid://dlg7kiwqonih6" path="res://shared/scenes/entities/static_props/static_prop.tscn" id="1_6xsjj"]
+[ext_resource type="PackedScene" uid="uid://da2w45qnwd15g" path="res://shared/scenes/entities/static_props/kinds/bee_cube.glb" id="2_3r8k0"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_7nnq6"]
+
+[node name="BeeCube" instance=ExtResource("1_6xsjj")]
+Kind = "BeeCube"
+
+[node name="CollisionShape3D" parent="." index="0"]
+shape = SubResource("BoxShape3D_7nnq6")
+
+[node name="bee_cube" parent="." index="1" instance=ExtResource("2_3r8k0")]

@@ -1,0 +1,22 @@
+[gd_scene load_steps=4 format=3 uid="uid://cgld1wg4yxvpp"]
+
+[ext_resource type="PackedScene" uid="uid://dklebaoqtp8r0" path="res://shared/scenes/entities/characters/character.tscn" id="1_lt077"]
+[ext_resource type="PackedScene" uid="uid://b6usutg0av1rc" path="res://shared/scenes/entities/characters/kinds/triangle_man.glb" id="2_v2tij"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_lt077"]
+radius = 0.355
+height = 1.78
+
+[node name="TriangleMan" instance=ExtResource("1_lt077")]
+Kind = "TriangleMan"
+Gravity = 12.0
+
+[node name="CollisionShape3D" parent="." index="0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.89, 0)
+shape = SubResource("CapsuleShape3D_lt077")
+
+[node name="ViewPoint" parent="." index="1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
+
+[node name="Visuals" parent="." index="2" instance=ExtResource("2_v2tij")]
+transform = Transform3D(-1, 0, 8.74228e-08, 0, 1, 0, -8.74228e-08, 0, -1, 0, 0, 0)

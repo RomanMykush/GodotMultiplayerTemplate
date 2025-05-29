@@ -1,0 +1,23 @@
+[gd_scene load_steps=4 format=3 uid="uid://dvjcomkpyf7sh"]
+
+[ext_resource type="PackedScene" uid="uid://dklebaoqtp8r0" path="res://shared/scenes/entities/characters/character.tscn" id="1_gc43w"]
+[ext_resource type="PackedScene" uid="uid://fyqf7vqm30an" path="res://shared/scenes/entities/characters/kinds/blaze_man.glb" id="2_trfsc"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_gc43w"]
+radius = 0.34
+height = 1.15
+
+[node name="BlazeMan" instance=ExtResource("1_gc43w")]
+Kind = "BlazeMan"
+Gravity = 2.0
+JumpVelocity = 4.0
+
+[node name="CollisionShape3D" parent="." index="0"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.575, 0)
+shape = SubResource("CapsuleShape3D_gc43w")
+
+[node name="ViewPoint" parent="." index="1"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0)
+
+[node name="Visuals" parent="." index="2" instance=ExtResource("2_trfsc")]
+transform = Transform3D(-1, 0, 8.74228e-08, 0, 1, 0, -8.74228e-08, 0, -1, 0, 0, 0)
