@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://c8nu05dyp37am"]
+
+[ext_resource type="Script" uid="uid://b67c88p331p5y" path="res://tests/test_scenes/clock_synchronization/components/server_tick_clock_imitation/ServerTickClockImitation.cs" id="1_o47mo"]
+
+[node name="ServerTickClockImitation" type="Node"]
+script = ExtResource("1_o47mo")

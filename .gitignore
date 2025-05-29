@@ -3,4 +3,4 @@
 
 # Project specific ignores
 builds/artifacts/
-test_result.dat
+test_result*.dat

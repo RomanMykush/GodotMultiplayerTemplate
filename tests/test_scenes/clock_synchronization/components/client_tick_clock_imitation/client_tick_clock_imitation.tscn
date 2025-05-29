@@ -1,0 +1,20 @@
+[gd_scene load_steps=4 format=3 uid="uid://bqkfxw8lrnb3s"]
+
+[ext_resource type="Script" uid="uid://xt20okmu4j0o" path="res://tests/test_scenes/clock_synchronization/components/client_tick_clock_imitation/ClientTickClockImitation.cs" id="1_7vwoo"]
+[ext_resource type="PackedScene" uid="uid://byb08xqrvqaa4" path="res://tests/test_scenes/clock_synchronization/components/client_tick_clock_imitation/components/latency_calculator_imitation.tscn" id="2_a575m"]
+[ext_resource type="PackedScene" uid="uid://l052ascsxqbs" path="res://tests/test_scenes/clock_synchronization/components/client_tick_clock_imitation/components/tick_synchronizer_imitation.tscn" id="3_g4qv8"]
+
+[node name="ClientTickClockImitation" type="Node"]
+script = ExtResource("1_7vwoo")
+
+[node name="Pinger" type="Timer" parent="."]
+unique_name_in_owner = true
+wait_time = 0.1
+
+[node name="Calculator" parent="." instance=ExtResource("2_a575m")]
+unique_name_in_owner = true
+
+[node name="Synchronizer" parent="." instance=ExtResource("3_g4qv8")]
+unique_name_in_owner = true
+
+[connection signal="LatencyCalculated" from="Calculator" to="Synchronizer" method="OnLatencyCalculated"]

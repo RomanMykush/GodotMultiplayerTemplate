@@ -1,0 +1,11 @@
+[gd_scene load_steps=3 format=3 uid="uid://l052ascsxqbs"]
+
+[ext_resource type="Script" uid="uid://dd3bvlh2sfl6n" path="res://tests/test_scenes/clock_synchronization/components/client_tick_clock_imitation/components/TickSynchronizerImitation.cs" id="1_tdmkc"]
+
+[sub_resource type="Curve" id="Curve_tdmkc"]
+_data = [Vector2(0, 0), 0.0, 0.0, 0, 0, Vector2(1, 1), 1.4, 0.0, 0, 0]
+point_count = 2
+
+[node name="TickSynchronizerImitation" type="Node"]
+script = ExtResource("1_tdmkc")
+SyncCurve = SubResource("Curve_tdmkc")

@@ -1,0 +1,14 @@
+[gd_scene load_steps=4 format=3 uid="uid://c73jkjwga7lww"]
+
+[ext_resource type="Script" uid="uid://c1oapb0a5l02b" path="res://tests/test_scenes/clock_synchronization/ClockSynchronizationTest.cs" id="1_gpfjm"]
+[ext_resource type="PackedScene" uid="uid://bqkfxw8lrnb3s" path="res://tests/test_scenes/clock_synchronization/components/client_tick_clock_imitation/client_tick_clock_imitation.tscn" id="2_birs0"]
+[ext_resource type="PackedScene" uid="uid://c8nu05dyp37am" path="res://tests/test_scenes/clock_synchronization/components/server_tick_clock_imitation/server_tick_clock_imitation.tscn" id="3_ua4a3"]
+
+[node name="ClockSynchronizationTest" type="Node"]
+script = ExtResource("1_gpfjm")
+
+[node name="ClientClock" parent="." instance=ExtResource("2_birs0")]
+unique_name_in_owner = true
+
+[node name="ServerClock" parent="." instance=ExtResource("3_ua4a3")]
+unique_name_in_owner = true

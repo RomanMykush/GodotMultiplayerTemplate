@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://byb08xqrvqaa4"]
+
+[ext_resource type="Script" uid="uid://bvisu31hhw0ln" path="res://tests/test_scenes/clock_synchronization/components/client_tick_clock_imitation/components/LatencyCalculatorImitation.cs" id="1_aill2"]
+
+[node name="LatencyCalculatorImitation" type="Node"]
+script = ExtResource("1_aill2")
