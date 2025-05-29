@@ -1,0 +1,55 @@
+[gd_scene load_steps=6 format=3 uid="uid://b5y1xb7ptqyly"]
+
+[ext_resource type="Script" uid="uid://c4d4qon8qge6g" path="res://server/scenes/main_game/MainGame.cs" id="1_rrsxx"]
+[ext_resource type="PackedScene" uid="uid://6hlewrg8x6p" path="res://shared/scenes/entities/static_props/kinds/basic_floor.tscn" id="2_e8ojg"]
+[ext_resource type="PackedScene" uid="uid://bdbcpnmadawwj" path="res://shared/scenes/entities/static_props/kinds/basic_block.tscn" id="3_lnub7"]
+[ext_resource type="PackedScene" uid="uid://cis0eh1o7364b" path="res://shared/scenes/entities/static_props/kinds/basic_ramp.tscn" id="4_p7vd0"]
+[ext_resource type="PackedScene" uid="uid://bcne54rg7bxv1" path="res://shared/scenes/entities/static_props/kinds/basic_wall.tscn" id="5_fn8kq"]
+
+[node name="MainGame" type="Node"]
+script = ExtResource("1_rrsxx")
+
+[node name="BasicFloor" parent="." instance=ExtResource("2_e8ojg")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.05, 0)
+
+[node name="BasicFloor2" parent="." instance=ExtResource("2_e8ojg")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.05, -6)
+
+[node name="BasicFloor5" parent="." instance=ExtResource("2_e8ojg")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.05, -12)
+
+[node name="BasicBlock" parent="." instance=ExtResource("3_lnub7")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 2, -6)
+
+[node name="BasicBlock4" parent="." instance=ExtResource("3_lnub7")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 2, -12)
+
+[node name="BasicBlock5" parent="." instance=ExtResource("3_lnub7")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 2, -12)
+
+[node name="BasicBlock2" parent="." instance=ExtResource("3_lnub7")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 2, -6)
+
+[node name="BasicBlock3" parent="." instance=ExtResource("3_lnub7")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 2, 0)
+
+[node name="BasicRamp" parent="." instance=ExtResource("4_p7vd0")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 2, 0)
+
+[node name="BasicWall2" parent="." instance=ExtResource("5_fn8kq")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 3)
+
+[node name="BasicWall3" parent="." instance=ExtResource("5_fn8kq")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 2, 3)
+
+[node name="BasicWall4" parent="." instance=ExtResource("5_fn8kq")]
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 3, 2, 0)
+
+[node name="BasicWall5" parent="." instance=ExtResource("5_fn8kq")]
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 3, 2, -6)
+
+[node name="BasicWall6" parent="." instance=ExtResource("5_fn8kq")]
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 3, 2, -12)
+
+[node name="BasicWall7" parent="." instance=ExtResource("5_fn8kq")]
+transform = Transform3D(-1, 0, 8.74228e-08, 0, 1, 0, -8.74228e-08, 0, -1, 0, 2, -15)

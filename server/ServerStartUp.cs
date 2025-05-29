@@ -1,11 +1,12 @@
 using Godot;
 using GodotMultiplayerTemplate.Shared;
-using System;
 
 namespace GodotMultiplayerTemplate.Server;
 
 public partial class ServerStartUp : PlatformStartUp
 {
+    [Export] private PackedScene MainGame;
+
     public override void AfterReady()
     {
         // Get port
@@ -19,6 +20,7 @@ public partial class ServerStartUp : PlatformStartUp
             maxPlayers = value;
 
         Network.Singleton.StartServer(port, maxPlayers);
+        GetTree().ChangeSceneToPacked(MainGame);
         Logger.Singleton.Log(LogLevel.Trace, "Server started");
     }
 }
