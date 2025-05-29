@@ -3,6 +3,7 @@ using MemoryPack;
 using GodotMultiplayerTemplate.Shared;
 using System.Collections.Generic;
 using System.Linq;
+using System;
 
 namespace GodotMultiplayerTemplate.Server;
 
@@ -19,6 +20,7 @@ public partial class GameWorld : Node
     private readonly Dictionary<uint, StateSnapshot> SnapshotHistory = [];
     private const int MaxSnapshotHistoryCount = 100;
     private readonly Dictionary<int, uint> LastSnapshotAck = [];
+    private uint LastEntityId = 0;
 
     public override void _Ready()
     {
@@ -87,6 +89,7 @@ public partial class GameWorld : Node
             switch (child)
             {
                 case IEntity entity:
+                    entity.EntityId = ++LastEntityId;
                     var node = entity as Node;
                     node.ProcessMode = ProcessModeEnum.Disabled;
                     Entities.Add(entity);
@@ -100,6 +103,22 @@ public partial class GameWorld : Node
                     break;
             }
         }
+    }
+
+    public void AddEntity(IEntity entity)
+    {
+        if (entity.EntityId != 0)
+        {
+            if (Entities.Contains(entity.EntityId))
+            {
+                Logger.Singleton.Log(LogLevel.Error, "Tried to add entity with existing id in level");
+                return;
+            }
+            LastEntityId = Math.Max(LastEntityId, entity.EntityId) + 1;
+        }
+        else entity.EntityId = ++LastEntityId;
+
+        Entities.Add(entity);
     }
 
     private void OnTickUpdated(uint currentTick)

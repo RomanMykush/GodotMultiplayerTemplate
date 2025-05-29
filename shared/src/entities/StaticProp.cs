@@ -7,7 +7,7 @@ public partial class StaticProp : StaticBody3D, ISpatial
 {
     [Export] public string Kind { get; private set; }
 
-    public uint EntityId { get; private set; }
+    public uint EntityId { get; set; }
 
     public EntityState GetState() => new StaticState(EntityId, Kind, Position, Rotation);
 

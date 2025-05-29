@@ -14,7 +14,7 @@ public partial class Character : CustomCharacterBody3D, ISpatial, IControlable
     [Export] public string Kind { get; private set; }
     [Export(PropertyHint.Range, "0,90,")] public float ViewAngleConstraint { get; private set; } = 85;
 
-    public uint EntityId { get; private set; }
+    public uint EntityId { get; set; }
     private IEnumerable<ICommand> LastInputs = [];
 
     // TODO: Put those properties in a separate physics logic components
