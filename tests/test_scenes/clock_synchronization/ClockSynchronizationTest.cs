@@ -67,6 +67,7 @@ public partial class ClockSynchronizationTest : MechanicTest
         GD.Print();
         GD.Print();
         GD.Print();
+        GD.Print($"Logs of the Clock synchronization test:");
         GD.Print("Starting processing clocks...");
 
         float delta = 1f / Engine.PhysicsTicksPerSecond;

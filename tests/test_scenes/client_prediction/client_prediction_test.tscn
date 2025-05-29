@@ -1,0 +1,14 @@
+[gd_scene load_steps=3 format=3 uid="uid://dkkbxdoxdqkxy"]
+
+[ext_resource type="Script" uid="uid://dwdtp3bv5olgm" path="res://tests/test_scenes/client_prediction/ClientPredictionTest.cs" id="1_inahn"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_inahn"]
+
+[node name="ClientPredictionTest" type="Node"]
+script = ExtResource("1_inahn")
+
+[node name="TestBody" type="CharacterBody3D" parent="."]
+unique_name_in_owner = true
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="TestBody"]
+shape = SubResource("BoxShape3D_inahn")
